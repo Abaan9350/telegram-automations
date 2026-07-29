@@ -19,17 +19,40 @@ def save_state(state):
 def extract_free_games(data):
     elements = data["data"]["Catalog"]["searchStore"]["elements"]
     free_games = []
+
     for game in elements:
-        offers = (game.get("promotions") or {}).get("promotionalOffers", [])
+        # Check for active promotions
+        promotions = game.get("promotions") or {}
+        offers = promotions.get("promotionalOffers") or []
+
         if not offers:
             continue
-        slug = game.get("productSlug")
-        if not slug and game.get("offerMappings"):
-            slug = game["offerMappings"][0].get("pageSlug")
-        url = f"https://store.epicgames.com/en-US/p/{slug}" if slug else "https://store.epicgames.com/en-US/free-games"
-        free_games.append({"title": game["title"], "url": url})
-    return free_games
 
+        # Check if the game is actually free
+        total_price = (game.get("price") or {}).get("totalPrice", {})
+        if total_price.get("discountPrice", -1) != 0:
+            continue
+
+        # Get the store slug
+        slug = game.get("productSlug")
+
+        if not slug:
+            mappings = game.get("offerMappings") or []
+            if mappings:
+                slug = mappings[0].get("pageSlug")
+
+        url = (
+            f"https://store.epicgames.com/en-US/p/{slug}"
+            if slug
+            else "https://store.epicgames.com/en-US/free-games"
+        )
+
+        free_games.append({
+            "title": game["title"],
+            "url": url,
+        })
+
+    return free_games
 def send_telegram_message(text):
     bot_token = os.environ["BOT_TOKEN"]
     chat_id = os.environ["TELEGRAM_CHAT_ID"]
