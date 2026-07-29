@@ -20,7 +20,7 @@ def extract_free_games(data):
     elements = data["data"]["Catalog"]["searchStore"]["elements"]
     free_games = []
     for game in elements:
-        offers = game.get("promotions", {}).get("promotionalOffers", [])
+        offers = (game.get("promotions") or {}).get("promotionalOffers", [])
         if not offers:
             continue
         slug = game.get("productSlug")

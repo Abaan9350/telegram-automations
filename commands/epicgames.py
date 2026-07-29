@@ -10,7 +10,7 @@ def extract_free_games(data):
     free_games = []
 
     for game in elements:
-        offers = game.get("promotions", {}).get("promotionalOffers", [])
+        offers = (game.get("promotions") or {}).get("promotionalOffers", [])
         if not offers:
             continue  # not currently free, skip (could be upcoming instead)
 
