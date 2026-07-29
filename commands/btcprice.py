@@ -19,7 +19,7 @@ async def btcprice(update: Update, context: ContextTypes.DEFAULT_TYPE):
         direction = "📈" if change >= 0 else "📉"
 
         await update.message.reply_text(
-            f"₿ Bitcoin: ${price:,.2f}\n"
+            f"Bitcoin: ${price:,.2f}\n"
             f"{direction} 24h change: {change:+.2f}%"
         )
     except httpx.HTTPStatusError:
