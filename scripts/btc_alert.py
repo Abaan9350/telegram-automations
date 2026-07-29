@@ -31,6 +31,8 @@ def send_telegram_message(text):
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
     with httpx.Client(timeout=10) as client:
         resp = client.post(url, json={"chat_id": chat_id, "text": text})
+        if resp.status_code >= 400:
+            print(f"Telegram API error response: {resp.text}")  # shows up in Action logs
         resp.raise_for_status()
 
 def main():
