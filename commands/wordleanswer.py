@@ -17,7 +17,7 @@ async def wordleanswer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             resp.raise_for_status()
             data = resp.json()
         solution = data["solution"].upper()
-        await update.message.reply_text(f"🟩 Today's Wordle answer: {solution}")
+        await update.message.reply_text(f"Today's Wordle answer: {solution}")
     except httpx.HTTPStatusError:
         await update.message.reply_text("⚠️ NYT hasn't published today's answer yet.")
     except (KeyError, ValueError):
