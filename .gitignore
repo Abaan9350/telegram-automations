@@ -2,7 +2,10 @@ __pycache__/
 *.pyc
 
 .env
-
+BOT_TOKEN=8802084918:AAFM2oWu8aCVZ3oze_5rcjfKwucYZ7AhpIM
+WEBHOOK_BASE_URL=https://telegram-automations.onrender.com
+WEBHOOK_SECRET=your-secret
+PORT=10000
 .venv/
 venv/
 
