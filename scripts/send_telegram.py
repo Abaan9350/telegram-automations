@@ -9,9 +9,19 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
 
+from datetime import date
+
+today = date.today().strftime("%Y-%m-%d")
+
+wordle_url = f"https://www.nytimes.com/svc/wordle/v2/{today}.json"
+
+wordle = requests.get(wordle_url).json()
+
+answer = wordle["solution"].upper()
+
 payload = {
     "chat_id": CHAT_ID,
-    "text": "🚀 Hello from GitHub!"
+    "text": f"🟩 Today's Wordle answer: {answer}"
 }
 
 response = requests.post(url, data=payload)
