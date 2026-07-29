@@ -1,0 +1,26 @@
+import datetime
+import httpx
+from telegram import Update
+from telegram.ext import ContextTypes
+from . import command
+
+NYT_URL = "https://www.nytimes.com/svc/wordle/v2/{date}.json"
+
+@command("wordleanswer")
+async def wordleanswer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    today = datetime.date.today().isoformat()
+    url = NYT_URL.format(date=today)
+
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            data = resp.json()
+        solution = data["solution"].upper()
+        await update.message.reply_text(f"🟩 Today's Wordle answer: {solution}")
+    except httpx.HTTPStatusError:
+        await update.message.reply_text("⚠️ NYT hasn't published today's answer yet.")
+    except (KeyError, ValueError):
+        await update.message.reply_text("⚠️ Got a response but couldn't parse it.")
+    except httpx.RequestError:
+        await update.message.reply_text("⚠️ Couldn't reach the NYT API right now.")
