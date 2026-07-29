@@ -1,6 +1,7 @@
 import os
 import json
 import httpx
+impot time
 
 STATE_FILE = "state/btc_alert_state.json"
 THRESHOLD_PCT = 1.0
@@ -18,10 +19,20 @@ def save_state(state):
 
 def get_btc_price_and_change():
     url = "https://api.coingecko.com/api/v3/simple/price"
-    params = {"ids": "bitcoin", "vs_currencies": "usd", "include_24hr_change": "true"}
+    params = {
+        "ids": "bitcoin",
+        "vs_currencies": "usd",
+        "include_24hr_change": "true",
+        "x_cg_demo_api_key": os.environ["COINGECKO_API_KEY"],
+    }
     with httpx.Client(timeout=10) as client:
-        resp = client.get(url, params=params)
-        resp.raise_for_status()
+        for attempt in range(3):
+            resp = client.get(url, params=params)
+            if resp.status_code == 429 and attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
+            resp.raise_for_status()
+            break
     data = resp.json()["bitcoin"]
     return data["usd"], data["usd_24h_change"]
 
