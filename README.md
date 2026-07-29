@@ -1,75 +1,63 @@
 # Telegram Automations Bot 🤖
 
-A modular Telegram bot built using **Python** and **python-telegram-bot**.
+A personal Telegram automation bot built using **Python** and the **Telegram Bot API**.
 
-The goal of this project is to create a personal automation bot where every new feature can be added as a separate command without modifying the core bot logic.
+This project is designed to provide useful automations and tools directly inside Telegram, such as commands, notifications, and API-powered features.
 
-Currently deployed using **Render Webhooks**.
-
----
-
-## ✨ Features
-
-- Modular command system
-- Automatic command discovery
-- Telegram webhook deployment
-- Easy-to-add new automations
-- Async API requests using HTTPX
-
-Current commands:
-
-| Command | Description |
-|---------|-------------|
-| `/wordleanswer` | Get today's Wordle answer |
-| `/test` | Test bot deployment status |
-
-More commands will be added over time.
+New automations can be added over time as the project grows.
 
 ---
 
-# 🏗️ Architecture
+# ✨ Features
 
-The project uses an auto-registration system.
-
-Every command lives inside the `commands/` folder.
-
-```
-telegram-automations/
-
-├── bot.py                  # Main bot entry point
-├── requirements.txt        # Python dependencies
-├── render.yaml             # Render deployment configuration
-├── .gitignore              # Ignored files and secrets
-├── .env.example            # Environment variable template
-│
-├── commands/
-│   ├── __init__.py         # Command registry
-│   ├── wordleanswer.py     # Wordle command
-│   └── test.py             # Test command
-```
+- Telegram bot integration
+- Custom commands
+- Automated notifications
+- API integrations
+- Easy extension with new features
+- Asynchronous request handling
 
 ---
 
-# 🚀 Setup Locally
+# 📌 Available Features
+
+Current features include:
+
+- Wordle answer lookup
+- Bot status testing
+- Bitcoin price movement alerts
+
+More automations will be added in the future.
+
+---
+
+# 🚀 Getting Started
 
 ## Prerequisites
 
-- Python 3.10+
+Before running the project, make sure you have:
+
+- Python 3.10 or higher
+- A Telegram account
 - A Telegram bot created using [BotFather](https://t.me/BotFather)
 
 ---
 
-## 1. Clone the repository
+## Installation
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/Abaan9350/telegram-automations.git
+```
 
+Navigate into the project:
+
+```bash
 cd telegram-automations
 ```
 
----
-
-## 2. Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -77,180 +65,93 @@ pip install -r requirements.txt
 
 ---
 
-## 3. Configure environment variables
+# ⚙️ Configuration
 
-Create a `.env` file:
+Create a `.env` file in the project directory:
 
 ```env
-BOT_TOKEN=your_bot_token_from_botfather
-
-WEBHOOK_BASE_URL=https://your-app.onrender.com
-
-WEBHOOK_SECRET=your_random_secret
+BOT_TOKEN=your_telegram_bot_token
+WEBHOOK_BASE_URL=your_deployment_url
+WEBHOOK_SECRET=your_webhook_secret
 ```
 
-Get your bot token from [BotFather](https://t.me/BotFather).
+You can get your Telegram bot token from [BotFather](https://t.me/BotFather).
+
+Never share your bot token publicly.
 
 ---
 
-## 4. Run the bot
+# ▶️ Running Locally
+
+Start the bot using:
 
 ```bash
 python bot.py
 ```
-
----
-
-# 🔒 Security Notes
-
-This project uses environment variables to store sensitive information.
-
-Never commit:
-
-- `.env` files
-- Telegram bot tokens
-- API keys
-- Secrets
-
-The provided `.env.example` file only contains placeholders and is safe to share publicly.
-
-Make sure `.gitignore` includes sensitive files before pushing changes.
 
 ---
 
 # ☁️ Deployment
 
-This project uses Render Web Service with Telegram webhooks.
+The bot can be deployed using cloud platforms that support Python applications.
 
-Deployment flow:
+Deployment requires:
 
-```
-GitHub
-   |
-   |
-Render
-   |
-   |
-Telegram Webhook
-   |
-   |
-Telegram Bot
-```
-
-## Render Setup
-
-1. Create a new Web Service on Render.
-2. Connect this GitHub repository.
-3. Configure:
-
-Build command:
-
-```bash
-pip install -r requirements.txt
-```
-
-Start command:
-
-```bash
-python bot.py
-```
-
-4. Add environment variables:
-
-```
-BOT_TOKEN
-WEBHOOK_BASE_URL
-WEBHOOK_SECRET
-```
-
-5. Deploy.
-
-The bot automatically registers the Telegram webhook on startup.
+- Installing dependencies from `requirements.txt`
+- Setting required environment variables
+- Starting the bot application
 
 ---
 
-# ➕ Adding a New Command
+# 🔐 Security
 
-Adding commands is simple.
+Do not commit sensitive information such as:
 
-Create a new file inside:
+- Telegram bot tokens
+- API keys
+- Passwords
+- `.env` files
+- Private credentials
 
-```
-commands/
-```
-
-Example:
-
-```
-commands/hello.py
-```
-
-Add:
-
-```python
-from telegram import Update
-from telegram.ext import ContextTypes
-
-from . import command
-
-
-@command("hello")
-async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "Hello from Telegram Automations!"
-    )
-```
-
-That's it.
-
-No changes are required in `bot.py`.
-
-The command will automatically be detected after deployment.
+Use environment variables or secret managers to store sensitive data.
 
 ---
 
-# 🧠 How It Works
+# 🧩 Adding New Features
 
-The command registry uses a decorator system.
+The project is designed to be extended easily.
 
-Example:
+New functionality can be added by:
 
-```python
-@command("hello")
-async def hello(update, context):
-    pass
-```
-
-When the bot starts:
-
-1. It scans the `commands/` folder.
-2. Imports every command file.
-3. Registers all decorated functions.
-4. Adds them as Telegram command handlers.
+1. Creating a new module for the feature.
+2. Connecting it with the Telegram bot.
+3. Adding required configuration or API keys.
+4. Testing locally before deployment.
 
 ---
 
 # 🛠️ Tech Stack
 
-- Python 3.10+
+- Python
 - python-telegram-bot
-- HTTPX
-- Render
 - Telegram Bot API
+- HTTPX
+- GitHub Actions
+- Render
 
 ---
 
-# 📌 Future Commands
+# 📌 Future Plans
 
-Planned automations:
+Possible future additions:
 
-- Epic Games free games
-- Football updates
-- Weather
-- News
-- Reddit feeds
-- Stock/crypto alerts
+- More useful Telegram commands
+- Additional price alerts
+- Sports updates
+- Weather notifications
+- News summaries
 - Personal productivity tools
+- More API-based automations
 
 ---
 
@@ -258,4 +159,4 @@ Planned automations:
 
 This project is licensed under the MIT License.
 
-Feel free to fork, modify, and build your own automations.
+Feel free to fork, modify, and build your own Telegram automations.
