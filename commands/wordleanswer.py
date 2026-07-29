@@ -6,7 +6,7 @@ from . import command
 
 NYT_URL = "https://www.nytimes.com/svc/wordle/v2/{date}.json"
 
-@command("wordleanswer")
+@command("wordleanswer", "Get today's Wordle answer")
 async def wordleanswer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     today = datetime.date.today().isoformat()
     url = NYT_URL.format(date=today)
