@@ -1,3 +1,15 @@
+Solid README honestly — structure, tone, and the "how it works" walkthrough are all good. A few things I'd tighten before going public:
+
+**Fixes worth making:**
+
+1. **Add a security note.** Once public, someone will eventually try `git clone` + `python bot.py` without reading carefully and wonder why nothing works, or worse, someone might not realize `.env` needs to stay untracked. Explicitly state it.
+2. **Add prerequisites** (Python version) — you specify deps but not what Python version is required.
+3. **`@BotFather` as a code block reads oddly** — it's not a command, just a name. Make it inline text/link instead.
+4. **Confirm `.gitignore` exists** before you go public — I don't see it mentioned; without it, if you ever run the bot locally and generate a `.env` or `__pycache__/`, those could get committed accidentally.
+
+Here's the patch — everything else stays as you wrote it:
+
+```markdown
 # Telegram Automations Bot 🤖
 
 A modular Telegram bot built using **Python** and **python-telegram-bot**.
@@ -35,7 +47,6 @@ Every command lives inside the `commands/` folder.
 
 ```
 telegram-automations/
-
 ├── bot.py                  # Main bot entry point
 ├── requirements.txt        # Python dependencies
 ├── render.yaml             # Render deployment configuration
@@ -52,15 +63,18 @@ telegram-automations/
 
 # 🚀 Setup Locally
 
+## 0. Prerequisites
+
+- Python 3.10+
+- A Telegram account
+- A bot token from [@BotFather](https://t.me/BotFather)
+
 ## 1. Clone the repository
 
 ```bash
 git clone https://github.com/Abaan9350/telegram-automations.git
-
 cd telegram-automations
 ```
-
----
 
 ## 2. Install dependencies
 
@@ -68,27 +82,21 @@ cd telegram-automations
 pip install -r requirements.txt
 ```
 
----
-
 ## 3. Configure environment variables
 
-Create a `.env` file:
+Copy the example file and fill in your own values:
+
+```bash
+cp .env.example .env
+```
 
 ```env
 BOT_TOKEN=your_bot_token_from_botfather
-
 WEBHOOK_BASE_URL=https://your-app.onrender.com
-
 WEBHOOK_SECRET=your_random_secret
 ```
 
-Get your bot token from:
-
-```
-@BotFather
-```
-
----
+> ⚠️ **Never commit your real `.env` file.** It's already excluded via `.gitignore` — only `.env.example` (with placeholder values) should ever be tracked.
 
 ## 4. Run the bot
 
@@ -105,16 +113,7 @@ This project uses Render Web Service with Telegram webhooks.
 Deployment flow:
 
 ```
-GitHub
-   |
-   |
-Render
-   |
-   |
-Telegram Webhook
-   |
-   |
-Telegram Bot
+GitHub → Render → Telegram Webhook → Telegram Bot
 ```
 
 ## Render Setup
@@ -123,25 +122,23 @@ Telegram Bot
 2. Connect this GitHub repository.
 3. Configure:
 
-Build command:
+   Build command:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-```bash
-pip install -r requirements.txt
-```
+   Start command:
+   ```bash
+   python bot.py
+   ```
 
-Start command:
+4. Add environment variables in the Render dashboard (not in the repo):
 
-```bash
-python bot.py
-```
-
-4. Add environment variables:
-
-```
-BOT_TOKEN
-WEBHOOK_BASE_URL
-WEBHOOK_SECRET
-```
+   ```
+   BOT_TOKEN
+   WEBHOOK_BASE_URL
+   WEBHOOK_SECRET
+   ```
 
 5. Deploy.
 
@@ -151,26 +148,13 @@ The bot automatically registers the Telegram webhook on startup.
 
 # ➕ Adding a New Command
 
-Adding commands is simple.
+Adding commands is simple. Create a new file inside `commands/`.
 
-Create a new file inside:
-
-```
-commands/
-```
-
-Example:
-
-```
-commands/hello.py
-```
-
-Add:
+Example: `commands/hello.py`
 
 ```python
 from telegram import Update
 from telegram.ext import ContextTypes
-
 from . import command
 
 
@@ -181,19 +165,13 @@ async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 ```
 
-That's it.
-
-No changes are required in `bot.py`.
-
-The command will automatically be detected after deployment.
+That's it. No changes are required in `bot.py` — the command is auto-detected on the next deploy.
 
 ---
 
 # 🧠 How It Works
 
-The command registry uses a decorator system.
-
-Example:
+The command registry uses a decorator system:
 
 ```python
 @command("hello")
