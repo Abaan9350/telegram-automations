@@ -2,6 +2,7 @@ import httpx
 from telegram import Update
 from telegram.ext import ContextTypes
 from users import save_user
+from notify import notify_admin
 from . import command
 
 EPIC_URL = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions"
@@ -55,7 +56,8 @@ async def fetch_free_games():
 
 @command("epicgames")
 async def epicgames(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    save_user(update.effective_user)
+    is_new = save_user(update.effective_user)
+    await notify_admin(context, update.effective_user, "/epicgames", is_new)
     try:
         games = await fetch_free_games()
 

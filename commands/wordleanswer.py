@@ -3,13 +3,15 @@ import httpx
 from telegram import Update
 from telegram.ext import ContextTypes
 from users import save_user
+from notify import notify_admin
 from . import command
 
 NYT_URL = "https://www.nytimes.com/svc/wordle/v2/{date}.json"
 
 @command("wordleanswer", "Get today's Wordle answer")
 async def wordleanswer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    save_user(update.effective_user)
+    is_new = save_user(update.effective_user)
+    await notify_admin(context, update.effective_user, "/wordleanswer", is_new)
     today = datetime.date.today().isoformat()
     url = NYT_URL.format(date=today)
 

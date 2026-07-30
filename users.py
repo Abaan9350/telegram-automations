@@ -15,6 +15,13 @@ conn.commit()
 
 
 def save_user(user):
+    # Check if user already exists
+    cursor.execute(
+        "SELECT 1 FROM users WHERE user_id = ?",
+        (user.id,)
+    )
+    is_new = cursor.fetchone() is None
+
     cursor.execute("""
     INSERT INTO users (user_id, username, first_name)
     VALUES (?, ?, ?)
@@ -23,8 +30,10 @@ def save_user(user):
         first_name = excluded.first_name,
         last_seen = CURRENT_TIMESTAMP
     """, (user.id, user.username, user.first_name))
+
     conn.commit()
 
+    return is_new
 
 def get_all_users():
     cursor.execute("""

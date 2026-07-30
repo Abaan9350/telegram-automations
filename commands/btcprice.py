@@ -4,6 +4,7 @@ import httpx
 from telegram import Update
 from telegram.ext import ContextTypes
 from users import save_user
+from notify import notify_admin
 from . import command
 
 COINGECKO_URL = "https://api.coingecko.com/api/v3/simple/price"
@@ -26,7 +27,9 @@ async def fetch_btc_data():
 
 @command("btcprice")
 async def btcprice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    save_user(update.effective_user)
+    is_new = save_user(update.effective_user)
+    await notify_admin(context, update.effective_user, "/btcprice", is_new)
+
     try:
         data = await fetch_btc_data()
         price = data["usd"]
