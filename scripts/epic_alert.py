@@ -73,7 +73,7 @@ def main():
     state = load_state()
 
     #if current_titles != state["titles"]:
-    if true: 
+    if True: 
         if games:
             lines = ["🎮 New free games on Epic Games Store:"]
             for g in games:
