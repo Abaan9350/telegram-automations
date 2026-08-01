@@ -1,7 +1,7 @@
 import os
 import json
 import httpx
-impot time
+import time
 
 STATE_FILE = "state/btc_alert_state.json"
 THRESHOLD_PCT = 1.0
