@@ -72,7 +72,8 @@ def main():
     current_titles = sorted(g["title"] for g in games)
     state = load_state()
 
-    if current_titles != state["titles"]:
+    #if current_titles != state["titles"]:
+    if true: 
         if games:
             lines = ["🎮 New free games on Epic Games Store:"]
             for g in games:
