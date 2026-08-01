@@ -15,7 +15,7 @@ def extract_free_games(data):
     for game in elements:
         # Check for active promotions
         promotions = game.get("promotions") or {}
-        offers = promotions.get("promotionalOffers", [])
+        offers = promotions.get("promotionalOffers") or []
 
         if not offers:
             continue
@@ -33,10 +33,11 @@ def extract_free_games(data):
             if mappings:
                 slug = mappings[0].get("pageSlug")
 
-        if slug:
-            url = f"https://store.epicgames.com/en-US/p/{slug}"
-        else:
-            url = "https://store.epicgames.com/en-US/free-games"
+        url = (
+            f"https://store.epicgames.com/en-US/p/{slug}"
+            if slug
+            else "https://store.epicgames.com/en-US/free-games"
+        )
 
         free_games.append({
             "title": game["title"],
@@ -58,6 +59,7 @@ async def fetch_free_games():
 async def epicgames(update: Update, context: ContextTypes.DEFAULT_TYPE):
     is_new = save_user(update.effective_user)
     await notify_admin(context, update.effective_user, "/epicgames", is_new)
+
     try:
         games = await fetch_free_games()
 
@@ -67,18 +69,38 @@ async def epicgames(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        lines = ["🎮 Currently FREE on Epic Games:\n"]
+        lines = [
+            "🎮 *Epic Games Free Games*",
+            "",
+            f"🎁 *{len(games)} game(s) currently free:*",
+            ""
+        ]
 
-        for game in games:
-            lines.append(f"• {game['title']}\n{game['url']}")
+        for i, game in enumerate(games, 1):
+            lines.append(
+                f"*{i}. {game['title']}*\n"
+                f"🔗 {game['url']}\n"
+            )
 
-        await update.message.reply_text("\n\n".join(lines))
+        lines.append("🎉 *Happy Gaming!*")
+
+        await update.message.reply_text(
+            "\n".join(lines),
+            parse_mode="Markdown",
+            disable_web_page_preview=True
+        )
 
     except httpx.HTTPStatusError:
-        await update.message.reply_text("⚠️ Epic Games API returned an error.")
+        await update.message.reply_text(
+            "⚠️ Epic Games API returned an error."
+        )
 
     except httpx.RequestError:
-        await update.message.reply_text("⚠️ Couldn't reach Epic Games.")
+        await update.message.reply_text(
+            "⚠️ Couldn't reach Epic Games."
+        )
 
     except Exception as e:
-        await update.message.reply_text(f"⚠️ Error: {e}")
+        await update.message.reply_text(
+            f"⚠️ Error: {e}"
+        )
