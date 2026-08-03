@@ -5,6 +5,7 @@ import time
 
 STATE_FILE = "state/btc_alert_state.json"
 from config import BTC_ALERT_THRESHOLD
+from config import REQUEST_TIMEOUT
 
 
 def load_state():
@@ -30,7 +31,7 @@ def get_btc_price_and_change():
         "x_cg_demo_api_key": os.environ["COINGECKO_API_KEY"],
     }
 
-    with httpx.Client(timeout=10) as client:
+    with httpx.Client(timeout=REQUEST_TIMEOUT) as client:
         for attempt in range(3):
             resp = client.get(url, params=params)
 
