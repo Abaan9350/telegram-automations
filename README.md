@@ -1,49 +1,113 @@
-# Telegram Automations Bot 🤖
+# Telegram Automations 🤖
 
-A personal Telegram automation bot built using **Python** and the **Telegram Bot API**.
+> A personal automation hub powered by Telegram.
 
-This project is designed to provide useful automations and tools directly inside Telegram, such as commands, notifications, and API-powered features.
+Telegram Automations is a Python-based project that brings useful utilities, scheduled automations, and real-time notifications directly into Telegram.
 
-New automations can be added over time as the project grows.
-
----
-
-# ✨ Features
-
-- Telegram bot integration
-- Custom commands
-- Automated notifications
-- API integrations
-- Easy extension with new features
-- Asynchronous request handling
+The project is designed to be modular and easy to extend. New commands, integrations, and automations can be added without affecting the existing codebase.
 
 ---
 
-# 📌 Available Features
+## ✨ Highlights
 
-Current features include:
-
-- Wordle answer lookup
-- Bot status testing
-- Bitcoin price movement alerts
-
-More automations will be added in the future.
-
----
-
-# 🚀 Getting Started
-
-## Prerequisites
-
-Before running the project, make sure you have:
-
-- Python 3.10 or higher
-- A Telegram account
-- A Telegram bot created using [BotFather](https://t.me/BotFather)
+* 🤖 Telegram Bot API integration
+* ⚡ Modular command system
+* 🔔 Scheduled automated notifications
+* 🌐 External API integrations
+* ☁️ Cloud deployment with Render
+* ⏰ Scheduled workflows using GitHub Actions
+* 🧩 Easily extensible architecture
 
 ---
 
-## Installation
+## 📋 Current Commands
+
+| Command         | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| `/btcprice`     | Displays the current Bitcoin price and 24-hour change |
+| `/epicgames`    | Lists the current free Epic Games Store games         |
+| `/wordleanswer` | Shows today's Wordle answer                           |
+| `/users`        | Displays registered bot users                         |
+
+---
+
+## 🔔 Current Automations
+
+| Automation               | Description                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| Bitcoin Price Alerts     | Sends an alert when Bitcoin's 24-hour price movement crosses the configured threshold |
+| Epic Games Notifications | Automatically notifies when new free Epic Games become available                      |
+
+---
+
+## 🛠️ Tech Stack
+
+* Python 3.12
+* python-telegram-bot
+* HTTPX
+* Telegram Bot API
+* CoinGecko API
+* GitHub Actions
+* Render
+
+---
+
+## 📂 Project Structure
+
+```text
+telegram-automations/
+│
+├── .github/
+│   └── workflows/
+│       ├── btc-alert.yml
+│       └── epic-alert.yml
+│
+├── commands/
+│   ├── btcprice.py
+│   ├── epicgames.py
+│   ├── expense.py
+│   ├── users.py
+│   ├── wordleanswer.py
+│   └── __init__.py
+│
+├── scripts/
+│   ├── btc_alert.py
+│   └── epic_alert.py
+│
+├── services/
+│   ├── google_sheets.py
+│   └── __init__.py
+│
+├── state/
+│   ├── btc_alert_state.json
+│   └── epic_alert_state.json
+│
+├── .env.example
+├── bot.py
+├── config.py
+├── notify.py
+├── render.yaml
+├── requirements.txt
+├── users.py
+└── README.md
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Before running the project, ensure you have:
+
+* Python 3.10 or later (Python 3.12 recommended)
+* A Telegram account
+* A Telegram bot created using BotFather
+* Git
+
+---
+
+## 📥 Installation
 
 Clone the repository:
 
@@ -51,13 +115,13 @@ Clone the repository:
 git clone https://github.com/Abaan9350/telegram-automations.git
 ```
 
-Navigate into the project:
+Navigate to the project directory:
 
 ```bash
 cd telegram-automations
 ```
 
-Install dependencies:
+Install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -65,98 +129,133 @@ pip install -r requirements.txt
 
 ---
 
-# ⚙️ Configuration
+## ⚙️ Configuration
 
-Create a `.env` file in the project directory:
+Create a `.env` file in the project root.
 
 ```env
-BOT_TOKEN=your_telegram_bot_token
-WEBHOOK_BASE_URL=your_deployment_url
+BOT_TOKEN=your_bot_token
+TELEGRAM_CHAT_ID=your_chat_id
+COINGECKO_API_KEY=your_coingecko_api_key
+WEBHOOK_BASE_URL=your_render_url
 WEBHOOK_SECRET=your_webhook_secret
 ```
 
-You can get your Telegram bot token from [BotFather](https://t.me/BotFather).
-
-Never share your bot token publicly.
+> Never commit your `.env` file or API keys to GitHub.
 
 ---
 
-# ▶️ Running Locally
+## ▶️ Running Locally
 
-Start the bot using:
+Start the Telegram bot:
 
 ```bash
 python bot.py
 ```
 
+Run an automation manually:
+
+```bash
+python scripts/btc_alert.py
+```
+
 ---
 
-# ☁️ Deployment
+## ☁️ Deployment
 
-The bot can be deployed using cloud platforms that support Python applications.
+The project is designed to run in the cloud.
+
+### Telegram Bot
+
+Hosted on **Render** for continuous availability.
+
+### Scheduled Automations
+
+Executed automatically using **GitHub Actions**.
 
 Deployment requires:
 
-- Installing dependencies from `requirements.txt`
-- Setting required environment variables
-- Starting the bot application
+* Installing dependencies from `requirements.txt`
+* Configuring environment variables
+* Deploying the bot
+* Enabling GitHub Actions
 
 ---
 
-# 🔐 Security
+## 🔐 Security
 
-Do not commit sensitive information such as:
+Sensitive information should **never** be committed to the repository.
 
-- Telegram bot tokens
-- API keys
-- Passwords
-- `.env` files
-- Private credentials
+Examples include:
 
-Use environment variables or secret managers to store sensitive data.
+* Telegram Bot Token
+* API Keys
+* Passwords
+* Private Credentials
+* `.env` files
 
----
-
-# 🧩 Adding New Features
-
-The project is designed to be extended easily.
-
-New functionality can be added by:
-
-1. Creating a new module for the feature.
-2. Connecting it with the Telegram bot.
-3. Adding required configuration or API keys.
-4. Testing locally before deployment.
+Always use environment variables or secret managers.
 
 ---
 
-# 🛠️ Tech Stack
+## 🧩 Adding New Features
 
-- Python
-- python-telegram-bot
-- Telegram Bot API
-- HTTPX
-- GitHub Actions
-- Render
+The project follows a modular structure.
 
----
+To add a new feature:
 
-# 📌 Future Plans
-
-Possible future additions:
-
-- More useful Telegram commands
-- Additional price alerts
-- Sports updates
-- Weather notifications
-- News summaries
-- Personal productivity tools
-- More API-based automations.
+1. Create a command or automation script.
+2. Add any required service modules.
+3. Configure API keys if needed.
+4. Test locally.
+5. Deploy and verify.
 
 ---
 
-# 📄 License
+## 🚧 Roadmap
 
-This project is licensed under the MIT License.
+### Completed
 
-Feel free to fork, modify, and build your own Telegram automations.
+* [x] Telegram Bot
+* [x] Bitcoin Price Command
+* [x] Bitcoin Price Alerts
+* [x] Epic Games Command
+* [x] Epic Games Notifications
+* [x] Wordle Answer Command
+* [x] User Management
+* [x] Google Sheets service structure
+
+### In Progress
+
+* [ ] Supabase state storage
+* [ ] Shared Telegram service
+* [ ] Shared CoinGecko service
+* [ ] Improved logging
+* [ ] Better error handling
+
+### Planned
+
+* [ ] Expense tracker
+* [ ] Weather updates
+* [ ] Sports notifications
+* [ ] News summaries
+* [ ] AI assistant
+* [ ] Home automation integration
+* [ ] Raspberry Pi deployment
+* [ ] Docker support
+
+---
+
+## 🤝 Contributing
+
+This project is currently maintained as a personal automation platform, but suggestions and improvements are always welcome.
+
+Feel free to fork the repository, experiment with new automations, and submit pull requests.
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License**.
+
+Feel free to use, modify, and build upon it for your own automation projects.
