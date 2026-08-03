@@ -4,7 +4,7 @@ import httpx
 import time
 
 STATE_FILE = "state/btc_alert_state.json"
-THRESHOLD_PCT = 1.0
+from config import BTC_ALERT_THRESHOLD
 
 
 def load_state():
@@ -80,7 +80,7 @@ def main():
 
     state = load_state()
 
-    crossed = abs(change) >= THRESHOLD_PCT
+    crossed = abs(change) >= BTC_ALERT_THRESHOLD
 
     if crossed and not state.get("alerted", False):
         direction = "📈" if change > 0 else "📉"

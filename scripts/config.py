@@ -1,0 +1,15 @@
+import os
+
+# Telegram
+BOT_TOKEN = os.environ["BOT_TOKEN"]
+TELEGRAM_CHAT_ID = os.environ["TELEGRAM_CHAT_ID"]
+
+# CoinGecko
+COINGECKO_API_KEY = os.environ["COINGECKO_API_KEY"]
+
+# HTTP
+REQUEST_TIMEOUT = 10
+MAX_RETRIES = 3
+
+# BTC Alerts
+BTC_ALERT_THRESHOLD = 1.0
