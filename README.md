@@ -151,7 +151,7 @@ Possible future additions:
 - Weather notifications
 - News summaries
 - Personal productivity tools
-- More API-based automations
+- More API-based automations.
 
 ---
 
