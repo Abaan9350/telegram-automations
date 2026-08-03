@@ -58,9 +58,8 @@ def extract_free_games(data):
     return free_games
 
 
-def send_telegram_message(text):
+def send_telegram_message(text, chat_id):
     bot_token = os.environ["BOT_TOKEN"]
-    chat_id = os.environ["TELEGRAM_CHAT_ID"]
 
     url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
 
@@ -87,7 +86,13 @@ def main():
 
     # Send a confirmation only when you manually click "Run workflow"
     if event == "workflow_dispatch":
-        send_telegram_message("🧪 *Epic Games workflow executed successfully!*")
+    chat_ids = os.environ["EPIC_GAMES_CHAT_IDS"].split(",")
+
+    for chat_id in chat_ids:
+        send_telegram_message(
+            "🧪 *Epic Games workflow executed successfully!*",
+            chat_id.strip()
+        )
 
     with httpx.Client(timeout=10) as client:
         resp = client.get(EPIC_URL)
@@ -115,7 +120,13 @@ def main():
 
             lines.append("🎉 *Happy Gaming!*")
 
-            send_telegram_message("\n".join(lines))
+            chat_ids = os.environ["EPIC_GAMES_CHAT_IDS"].split(",")
+
+            for chat_id in chat_ids:
+                send_telegram_message(
+                    "\n".join(lines),
+                    chat_id.strip()
+                )
 
         state["titles"] = current_titles
         save_state(state)
