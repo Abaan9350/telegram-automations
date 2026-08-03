@@ -21,6 +21,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          EPIC_GAMES_CHAT_IDS: ${{ secrets.EPIC_GAMES_CHAT_IDS }}
         run: python scripts/epic_alert.py
       - name: Commit updated state
         run: |
