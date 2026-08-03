@@ -86,13 +86,13 @@ def main():
 
     # Send a confirmation only when you manually click "Run workflow"
     if event == "workflow_dispatch":
-    chat_ids = os.environ["EPIC_GAMES_CHAT_IDS"].split(",")
+        chat_ids = os.environ["EPIC_GAMES_CHAT_IDS"].split(",")
 
-    for chat_id in chat_ids:
-        send_telegram_message(
-            "🧪 *Epic Games workflow executed successfully!*",
-            chat_id.strip()
-        )
+        for chat_id in chat_ids:
+            send_telegram_message(
+                "🧪 *Epic Games workflow executed successfully!*",
+                chat_id.strip()
+            )
 
     with httpx.Client(timeout=10) as client:
         resp = client.get(EPIC_URL)
