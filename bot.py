@@ -23,6 +23,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
+WEBHOOK_BASE_URL = os.getenv("WEBHOOK_BASE_URL")
+WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
+PORT = int(os.getenv("PORT", 10000))
 
 
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
@@ -36,7 +39,7 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
 
 async def prepare_polling(app: Application):
     """
-    Remove any existing webhook so Telegram starts sending updates via polling.
+    Remove webhook so Telegram starts sending updates via polling.
     Safe to call every time.
     """
     try:
@@ -57,13 +60,27 @@ def main():
 
     app.add_error_handler(error_handler)
 
-    logger.info("Running in POLLING mode.")
+    # Running on Render?
+    if os.getenv("RENDER"):
+        logger.info("Running in WEBHOOK mode.")
 
-    app.post_init = prepare_polling
+        app.run_webhook(
+            listen="0.0.0.0",
+            port=PORT,
+            url_path=BOT_TOKEN,
+            webhook_url=f"{WEBHOOK_BASE_URL}/{BOT_TOKEN}",
+            secret_token=WEBHOOK_SECRET,
+        )
 
-    app.run_polling(
-        drop_pending_updates=True
-    )
+    # Running locally
+    else:
+        logger.info("Running in POLLING mode.")
+
+        app.post_init = prepare_polling
+
+        app.run_polling(
+            drop_pending_updates=True
+        )
 
 
 if __name__ == "__main__":
