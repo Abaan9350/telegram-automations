@@ -122,7 +122,7 @@ async def steamgames(update: Update, context: ContextTypes.DEFAULT_TYPE):
         for i, game in enumerate(games, 1):
             lines.append(
                 f"*{i}. {game['title']}*\n"
-                f"💰 {game['original_price']} → *FREE*\n"
+                f"💰{game['original_price']} → *FREE*\n"
                 f"🔗 {game['url']}\n"
             )
 

@@ -254,7 +254,7 @@ def main():
         for game in new_games:
             lines.append(
                 f"🎮 *{game['title']}*\n"
-                f"💰 Was: {game['original_price']} → *FREE*\n"
+                f"💰{game['original_price']} → *FREE*\n"
                 f"🔗 {game['url']}\n"
             )
 
