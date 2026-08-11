@@ -3,20 +3,24 @@ import json
 import httpx
 import time
 
-STATE_FILE = "state/btc_alert_state.json"
 from config import BTC_ALERT_THRESHOLD
 from config import REQUEST_TIMEOUT
+
+
+STATE_FILE = "state/btc_alert_state.json"
 
 
 def load_state():
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE) as f:
             return json.load(f)
+
     return {"alerted": False}
 
 
 def save_state(state):
     os.makedirs(os.path.dirname(STATE_FILE), exist_ok=True)
+
     with open(STATE_FILE, "w") as f:
         json.dump(state, f)
 
@@ -43,6 +47,7 @@ def get_btc_price_and_change():
             break
 
     data = resp.json()["bitcoin"]
+
     return data["usd"], data["usd_24h_change"]
 
 
@@ -59,8 +64,8 @@ def send_telegram_message(text):
                 "chat_id": chat_id,
                 "text": text,
                 "parse_mode": "Markdown",
-                "disable_web_page_preview": True
-            }
+                "disable_web_page_preview": True,
+            },
         )
 
         if resp.status_code >= 400:
@@ -73,9 +78,11 @@ def main():
     # Detect how the workflow was started
     event = os.getenv("GITHUB_EVENT_NAME")
 
-    # Send a confirmation only when you manually click "Run workflow"
+    # Send a confirmation only when manually triggered
     if event == "workflow_dispatch":
-        send_telegram_message("🧪 *BTC Price Alert workflow executed successfully!*")
+        send_telegram_message(
+            "🧪 *BTC Price Alert workflow executed successfully!*"
+        )
 
     price, change = get_btc_price_and_change()
 
@@ -83,6 +90,7 @@ def main():
 
     crossed = abs(change) >= BTC_ALERT_THRESHOLD
 
+    # Threshold crossed and alert hasn't been sent yet
     if crossed and not state.get("alerted", False):
         direction = "📈" if change > 0 else "📉"
 
@@ -95,8 +103,8 @@ def main():
         state["alerted"] = True
         save_state(state)
 
+    # Threshold no longer crossed, reset the alert state
     elif not crossed and state.get("alerted", False):
-        # Reset so the next threshold crossing sends a notification again
         state["alerted"] = False
         save_state(state)
 
