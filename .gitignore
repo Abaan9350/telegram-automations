@@ -9,3 +9,6 @@ venv/
 *.log
 
 .vscode/
+
+credentials/
+.env
