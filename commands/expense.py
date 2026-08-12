@@ -6,7 +6,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 
 from commands import command
-from services.google_sheets import append_transaction
+from services.google_sheets import append_transaction, undo_last_expense
 
 
 TRANSACTION_REGEX = re.compile(
@@ -74,3 +74,22 @@ async def income(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     await handle_transaction(update, "income")
+
+@command("undoexpense", "Undo the most recent expense")
+async def undoexpense(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not is_admin(update):
+        await update.effective_message.reply_text(
+            "⛔ You are not authorized to use this command."
+        )
+        return
+
+    removed = undo_last_expense()
+
+    if removed:
+        await update.effective_message.reply_text(
+            "✅ Last expense has been removed."
+        )
+    else:
+        await update.effective_message.reply_text(
+            "ℹ️ No expense found to undo."
+        )

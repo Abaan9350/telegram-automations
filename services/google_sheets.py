@@ -85,3 +85,18 @@ def append_transaction(
         row,
         value_input_option="USER_ENTERED",
     )
+
+def undo_last_expense():
+    sheet = get_sheet()
+    rows = sheet.get_all_values()
+
+    # Start from the last row and find the most recent expense
+    for row_number in range(len(rows), 1, -1):
+        row = rows[row_number - 1]
+
+        # Column C = Expenses
+        if len(row) >= 3 and row[2].strip():
+            sheet.delete_rows(row_number)
+            return True
+
+    return False
