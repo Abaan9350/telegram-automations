@@ -1,4 +1,5 @@
 import os
+import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -10,46 +11,40 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
-
 def get_sheet():
-    # Google Spreadsheet ID from environment variables
     spreadsheet_id = os.environ["SPREADSHEET_ID"]
 
-    # Automatically select the current month using India time.
-    # Example:
-    # August  -> "August"
-    # September -> "September"
-    # October -> "October"
     worksheet_name = datetime.now(
         ZoneInfo("Asia/Kolkata")
     ).strftime("%B")
 
-    # Find the project root directory
-    project_root = os.path.dirname(
-        os.path.dirname(os.path.abspath(__file__))
-    )
+    credentials_json = os.getenv("GOOGLE_CREDENTIALS")
 
-    # Google service account JSON file
-    credentials_file = os.path.join(
-        project_root,
-        "credentials",
-        "google-service-account.json",
-    )
+    if credentials_json:
+        credentials = Credentials.from_service_account_info(
+            json.loads(credentials_json),
+            scopes=SCOPES,
+        )
+    else:
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
 
-    # Authenticate with Google
-    credentials = Credentials.from_service_account_file(
-        credentials_file,
-        scopes=SCOPES,
-    )
+        credentials_file = os.path.join(
+            project_root,
+            "credentials",
+            "google-service-account.json",
+        )
+
+        credentials = Credentials.from_service_account_file(
+            credentials_file,
+            scopes=SCOPES,
+        )
 
     client = gspread.authorize(credentials)
-
-    # Open the spreadsheet
     spreadsheet = client.open_by_key(spreadsheet_id)
 
-    # Open the current month's worksheet
     return spreadsheet.worksheet(worksheet_name)
-
 
 def append_transaction(
     date: str,
