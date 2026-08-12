@@ -15,13 +15,14 @@ from telegram.error import TelegramError
 from telegram.ext import (
     Application,
     CommandHandler,
+    CallbackQueryHandler,
     ContextTypes,
 )
 
 from commands import load_all, COMMAND_HANDLERS
+from commands.expense import undo_callback
 
 
-# Load environment variables from .env when running locally
 load_dotenv()
 
 
@@ -55,10 +56,6 @@ async def error_handler(
 
 
 async def prepare_polling(app: Application):
-    """
-    Remove webhook so Telegram starts sending updates via polling.
-    Safe to call every time.
-    """
     try:
         await app.bot.delete_webhook(drop_pending_updates=True)
         logger.info("Webhook removed successfully.")
@@ -67,12 +64,7 @@ async def prepare_polling(app: Application):
 
 
 async def run_server(app: Application):
-    """
-    Run Telegram webhook and health endpoint on the same web server.
-    """
-
     async def telegram_webhook(request: Request):
-        # Verify Telegram's secret token
         if WEBHOOK_SECRET:
             received_secret = request.headers.get(
                 "X-Telegram-Bot-Api-Secret-Token"
@@ -118,7 +110,6 @@ async def run_server(app: Application):
         ]
     )
 
-
     await app.bot.set_webhook(
         url=f"{WEBHOOK_BASE_URL}/{BOT_TOKEN}",
         secret_token=WEBHOOK_SECRET,
@@ -147,8 +138,6 @@ async def run_server(app: Application):
 def main():
     load_all()
 
-    # Render uses custom webhook server.
-    # Local machine uses normal polling.
     if os.getenv("RENDER"):
         logger.info("Running in WEBHOOK mode.")
 
@@ -168,11 +157,17 @@ def main():
             .build()
         )
 
-    # Register all commands
     for name, handler_func, _ in COMMAND_HANDLERS:
         app.add_handler(
             CommandHandler(name, handler_func)
         )
+
+    app.add_handler(
+        CallbackQueryHandler(
+            undo_callback,
+            pattern=r"^undo_(yes|no)(:\d+)?$",
+        )
+    )
 
     app.add_error_handler(error_handler)
 

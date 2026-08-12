@@ -11,6 +11,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
 ]
 
+
 def get_sheet():
     spreadsheet_id = os.environ["SPREADSHEET_ID"]
 
@@ -46,6 +47,7 @@ def get_sheet():
 
     return spreadsheet.worksheet(worksheet_name)
 
+
 def append_transaction(
     date: str,
     item: str,
@@ -55,22 +57,17 @@ def append_transaction(
 ):
     sheet = get_sheet()
 
-    # Determine the row that will be appended
     next_row = len(sheet.get_all_values()) + 1
 
-    # Put the amount in the correct column
     expense = amount if transaction_type == "expense" else ""
     income = amount if transaction_type == "income" else ""
 
-    # Running balance formula
     remaining_formula = (
         f'=IF(OR(C{next_row}<>"",D{next_row}<>""),'
         f'SUM($D$2:INDEX(D:D,ROW()))-'
         f'SUM($C$2:INDEX(C:C,ROW())),"")'
     )
 
-    # Column order:
-    # Date | Item | Expenses | Income | Remaining | Description | Category
     row = [
         date,
         item,
@@ -86,17 +83,24 @@ def append_transaction(
         value_input_option="USER_ENTERED",
     )
 
-def undo_last_expense():
+
+def get_last_expense():
     sheet = get_sheet()
     rows = sheet.get_all_values()
 
-    # Start from the last row and find the most recent expense
     for row_number in range(len(rows), 1, -1):
         row = rows[row_number - 1]
 
-        # Column C = Expenses
         if len(row) >= 3 and row[2].strip():
-            sheet.delete_rows(row_number)
-            return True
+            return {
+                "row_number": row_number,
+                "item": row[1],
+                "amount": row[2],
+            }
 
-    return False
+    return None
+
+
+def delete_expense(row_number: int):
+    sheet = get_sheet()
+    sheet.delete_rows(row_number)

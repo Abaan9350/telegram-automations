@@ -2,11 +2,19 @@ import os
 import re
 from datetime import datetime
 
-from telegram import Update
+from telegram import (
+    Update,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 from telegram.ext import ContextTypes
 
 from commands import command
-from services.google_sheets import append_transaction, undo_last_expense
+from services.google_sheets import (
+    append_transaction,
+    get_last_expense,
+    delete_expense,
+)
 
 
 TRANSACTION_REGEX = re.compile(
@@ -24,6 +32,9 @@ async def handle_transaction(
     transaction_type: str,
 ):
     if not is_admin(update):
+        await update.effective_message.reply_text(
+            "⛔ You are not authorized to use this command."
+        )
         return
 
     text = update.effective_message.text.strip()
@@ -50,46 +61,91 @@ async def handle_transaction(
     )
 
     await update.effective_message.reply_text(
-        f"✅ {transaction_type.capitalize()} added: ₹{amount} for {item.strip()}"
+        f"✅ {transaction_type.capitalize()} added: "
+        f"₹{amount} for {item.strip()}"
     )
 
 
 @command("expense", "Add an expense")
-async def expense(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_admin(update):
-        await update.effective_message.reply_text(
-            "⛔ You are not authorized to use this command."
-        )
-        return
-
+async def expense(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
     await handle_transaction(update, "expense")
 
 
 @command("income", "Add income")
-async def income(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    if not is_admin(update):
-        await update.effective_message.reply_text(
-            "⛔ You are not authorized to use this command."
-        )
-        return
-
+async def income(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
     await handle_transaction(update, "income")
 
+
 @command("undoexpense", "Undo the most recent expense")
-async def undoexpense(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def undoexpense(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
     if not is_admin(update):
         await update.effective_message.reply_text(
             "⛔ You are not authorized to use this command."
         )
         return
 
-    removed = undo_last_expense()
+    expense_data = get_last_expense()
 
-    if removed:
-        await update.effective_message.reply_text(
-            "✅ Last expense has been removed."
-        )
-    else:
+    if not expense_data:
         await update.effective_message.reply_text(
             "ℹ️ No expense found to undo."
         )
+        return
+
+    keyboard = InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "✅ Yes",
+                    callback_data=f"undo_yes:{expense_data['row_number']}",
+                ),
+                InlineKeyboardButton(
+                    "❌ No",
+                    callback_data="undo_no",
+                ),
+            ]
+        ]
+    )
+
+    await update.effective_message.reply_text(
+        f'Are you sure you want to delete '
+        f'"{expense_data["item"]} ₹{expense_data["amount"]}"?',
+        reply_markup=keyboard,
+    )
+
+
+async def undo_callback(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    query = update.callback_query
+    await query.answer()
+
+    if not is_admin(update):
+        await query.edit_message_text(
+            "⛔ You are not authorized to use this."
+        )
+        return
+
+    if query.data == "undo_no":
+        await query.edit_message_text(
+            "❌ Undo cancelled."
+        )
+        return
+
+    row_number = int(query.data.split(":")[1])
+
+    delete_expense(row_number)
+
+    await query.edit_message_text(
+        "✅ Last expense has been removed."
+    )
