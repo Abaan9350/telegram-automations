@@ -1,22 +1,28 @@
+Yep bro. Since this is the **Telegram Automations repo README**, I'd make it reflect what you've actually built now, especially the **Expense Tracker**, Render hosting, and the modular automation setup.
+
+````md
 # Telegram Automations 🤖
 
 > A personal automation hub powered by Telegram.
 
-Telegram Automations is a Python-based project that brings useful utilities, scheduled automations, and real-time notifications directly into Telegram.
+Telegram Automations is a Python-based personal automation platform that brings useful utilities, productivity tools, notifications, and finance tracking directly into Telegram.
 
-The project is designed to be modular and easy to extend. New commands, integrations, and automations can be added without affecting the existing codebase.
+The project is designed to be modular and easy to extend. New commands, integrations, and automations can be added without affecting the existing system.
 
 ---
 
 ## ✨ Highlights
 
-* 🤖 Telegram Bot API integration
-* ⚡ Modular command system
-* 🔔 Scheduled automated notifications
-* 🌐 External API integrations
-* ☁️ Cloud deployment with Render
-* ⏰ Scheduled workflows using GitHub Actions
-* 🧩 Easily extensible architecture
+- 🤖 Telegram Bot API integration
+- ⚡ Modular command-based architecture
+- 💰 Personal expense and income tracking
+- 📊 Google Sheets integration
+- 🔔 Automated notifications and alerts
+- 🌐 External API integrations
+- ☁️ Cloud deployment with Render
+- ⏰ Scheduled workflows using GitHub Actions
+- 🧩 Easily extensible architecture
+- 🔐 Environment-based configuration
 
 ---
 
@@ -27,7 +33,34 @@ The project is designed to be modular and easy to extend. New commands, integrat
 | `/btcprice`     | Displays the current Bitcoin price and 24-hour change |
 | `/epicgames`    | Lists the current free Epic Games Store games         |
 | `/wordleanswer` | Shows today's Wordle answer                           |
+| `/expense`      | Records and processes personal expenses and income    |
 | `/users`        | Displays registered bot users                         |
+
+---
+
+## 💰 Expense Tracker
+
+The Telegram Expense Tracker allows expenses and income to be recorded directly through Telegram.
+
+Example:
+
+```text
+Spent 250 on groceries
+````
+
+The system processes the message, identifies the transaction details, and stores the structured information in a Google Sheets budget tracker.
+
+### Features
+
+* 💸 Record expenses through Telegram
+* 💰 Record income
+* 🤖 Natural language transaction input
+* 📊 Google Sheets storage
+* 📅 Automatic date handling
+* 🧾 Transaction descriptions
+* 🔄 Easy access through Telegram
+
+The goal is to make expense tracking as simple as sending a message.
 
 ---
 
@@ -37,6 +70,7 @@ The project is designed to be modular and easy to extend. New commands, integrat
 | ------------------------ | ------------------------------------------------------------------------------------- |
 | Bitcoin Price Alerts     | Sends an alert when Bitcoin's 24-hour price movement crosses the configured threshold |
 | Epic Games Notifications | Automatically notifies when new free Epic Games become available                      |
+| Expense Tracker          | Processes Telegram messages and stores financial transactions in Google Sheets        |
 
 ---
 
@@ -46,9 +80,11 @@ The project is designed to be modular and easy to extend. New commands, integrat
 * python-telegram-bot
 * HTTPX
 * Telegram Bot API
+* Google Sheets API
 * CoinGecko API
 * GitHub Actions
 * Render
+* UptimeRobot
 
 ---
 
@@ -104,6 +140,7 @@ Before running the project, ensure you have:
 * A Telegram account
 * A Telegram bot created using BotFather
 * Git
+* Google Cloud credentials if using the Expense Tracker
 
 ---
 
@@ -141,7 +178,9 @@ WEBHOOK_BASE_URL=your_render_url
 WEBHOOK_SECRET=your_webhook_secret
 ```
 
-> Never commit your `.env` file or API keys to GitHub.
+For Google Sheets integration, configure the required Google credentials according to the project's service configuration.
+
+> Never commit your `.env` file, API keys, or private credentials to GitHub.
 
 ---
 
@@ -163,22 +202,29 @@ python scripts/btc_alert.py
 
 ## ☁️ Deployment
 
-The project is designed to run in the cloud.
+The project is designed to run continuously in the cloud.
 
 ### Telegram Bot
 
-Hosted on **Render** for continuous availability.
+The Telegram bot is hosted on **Render**.
+
+Render provides the cloud environment required to keep the bot available without running it manually on a local computer.
+
+### Keeping the Service Active
+
+An uptime monitoring service can periodically ping the deployed application to help prevent the free hosting service from becoming inactive.
 
 ### Scheduled Automations
 
-Executed automatically using **GitHub Actions**.
+Scheduled tasks such as Bitcoin alerts and Epic Games notifications can be executed using **GitHub Actions**.
 
 Deployment requires:
 
 * Installing dependencies from `requirements.txt`
 * Configuring environment variables
-* Deploying the bot
-* Enabling GitHub Actions
+* Deploying the application to Render
+* Configuring GitHub Actions
+* Configuring required external API credentials
 
 ---
 
@@ -190,11 +236,43 @@ Examples include:
 
 * Telegram Bot Token
 * API Keys
+* Google credentials
 * Passwords
-* Private Credentials
+* Private credentials
 * `.env` files
 
-Always use environment variables or secret managers.
+Always use environment variables, GitHub Secrets, or appropriate secret management solutions.
+
+---
+
+## 🧩 Architecture
+
+The project separates different responsibilities into individual modules.
+
+```text
+                    ┌──────────────────┐
+                    │     Telegram     │
+                    │      User        │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │  Telegram Bot    │
+                    │     bot.py       │
+                    └────────┬─────────┘
+                             │
+             ┌───────────────┼───────────────┐
+             ▼               ▼               ▼
+       ┌───────────┐   ┌────────────┐  ┌────────────┐
+       │ Commands  │   │  Services  │  │Automations │
+       └─────┬─────┘   └──────┬─────┘  └──────┬─────┘
+             │                │               │
+             ▼                ▼               ▼
+       Telegram         Google Sheets    GitHub Actions
+       Utilities        External APIs    Scheduled Tasks
+```
+
+This structure makes it easier to add new commands and integrations without modifying the entire application.
 
 ---
 
@@ -206,9 +284,10 @@ To add a new feature:
 
 1. Create a command or automation script.
 2. Add any required service modules.
-3. Configure API keys if needed.
-4. Test locally.
-5. Deploy and verify.
+3. Configure API keys or credentials if required.
+4. Register the command with the Telegram bot.
+5. Test locally.
+6. Deploy and verify.
 
 ---
 
@@ -223,7 +302,9 @@ To add a new feature:
 * [x] Epic Games Notifications
 * [x] Wordle Answer Command
 * [x] User Management
-* [x] Google Sheets service structure
+* [x] Google Sheets Integration
+* [x] Telegram Expense Tracker
+* [x] Cloud Deployment with Render
 
 ### In Progress
 
@@ -232,14 +313,15 @@ To add a new feature:
 * [ ] Shared CoinGecko service
 * [ ] Improved logging
 * [ ] Better error handling
+* [ ] Improve expense categorization
 
 ### Planned
 
-* [ ] Expense tracker
 * [ ] Weather updates
 * [ ] Sports notifications
 * [ ] News summaries
 * [ ] AI assistant
+* [ ] More personal productivity tools
 * [ ] Home automation integration
 * [ ] Raspberry Pi deployment
 * [ ] Docker support
@@ -259,3 +341,8 @@ Feel free to fork the repository, experiment with new automations, and submit pu
 This project is licensed under the **MIT License**.
 
 Feel free to use, modify, and build upon it for your own automation projects.
+
+```
+
+**Summary:** This version makes the README look like an actual evolving automation platform rather than just a Telegram bot. The Expense Tracker is now a first-class feature, while Render, UptimeRobot, Google Sheets, and the modular architecture are properly represented.
+```
