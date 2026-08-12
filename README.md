@@ -1,29 +1,108 @@
-# Telegram Automations 🤖
+<a id="readme-top"></a>
 
-> A personal automation hub powered by Telegram.
+<!-- PROJECT SHIELDS -->
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
 
-Telegram Automations is a Python-based personal automation platform that brings useful utilities, productivity tools, notifications, and finance tracking directly into Telegram.
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/Abaan9350/telegram-automations">
+    <img src="images/logo.png" alt="Logo" width="80" height="80">
+  </a>
 
-The project is designed to be modular and easy to extend. New commands, integrations, and automations can be added without affecting the existing system.
+  <h3 align="center">Telegram Automations 🤖</h3>
 
----
+  <p align="center">
+    A personal automation hub powered by Telegram.
+    <br />
+    Automate everyday tasks, track expenses, receive notifications, and build useful utilities directly through Telegram.
+    <br />
+    <br />
+    <a href="https://github.com/Abaan9350/telegram-automations">View Repository</a>
+    &middot;
+    <a href="https://github.com/Abaan9350/telegram-automations/issues">Report Bug</a>
+    &middot;
+    <a href="https://github.com/Abaan9350/telegram-automations/issues">Request Feature</a>
+  </p>
+</div>
 
-## ✨ Highlights
+<!-- TABLE OF CONTENTS -->
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#current-features">Current Features</a></li>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#project-structure">Project Structure</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#license">License</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-- 🤖 Telegram Bot API integration
-- ⚡ Modular command-based architecture
+<!-- ABOUT THE PROJECT -->
+## About The Project
+
+Telegram Automations is a personal Python-based automation platform built around the Telegram Bot API.
+
+The goal of the project is simple: instead of opening different applications or manually repeating everyday tasks, useful tools and automations can be accessed directly through Telegram.
+
+The project is designed with a modular architecture so that new commands, services, APIs, and automations can be added without affecting the existing functionality.
+
+### Current Features
+
+- 🤖 Telegram Bot integration
 - 💰 Personal expense and income tracking
 - 📊 Google Sheets integration
-- 🔔 Automated notifications and alerts
+- ₿ Bitcoin price tracking
+- 🔔 Bitcoin price alerts
+- 🎮 Epic Games free game notifications
+- 🟩 Wordle answer utility
+- 👥 Telegram user management
+- ☁️ Render cloud deployment
+- ⏰ GitHub Actions scheduled workflows
 - 🌐 External API integrations
-- ☁️ Cloud deployment with Render
-- ⏰ Scheduled workflows using GitHub Actions
-- 🧩 Easily extensible architecture
-- 🔐 Environment-based configuration
+- 🧩 Modular command structure
 
----
+### Expense Tracker
 
-## 📋 Current Commands
+One of the main features of the project is a personal finance tracker that works entirely through Telegram.
+
+Users can send natural language messages such as:
+
+```text
+Spent 250 on groceries
+````
+
+The system processes the message and records the relevant transaction information in Google Sheets.
+
+This makes tracking daily expenses much faster than manually opening a spreadsheet or finance application.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CURRENT FEATURES -->
+
+## Current Features
+
+### Telegram Commands
 
 | Command         | Description                                           |
 | --------------- | ----------------------------------------------------- |
@@ -33,35 +112,7 @@ The project is designed to be modular and easy to extend. New commands, integrat
 | `/expense`      | Records and processes personal expenses and income    |
 | `/users`        | Displays registered bot users                         |
 
----
-
-## 💰 Expense Tracker
-
-The Telegram Expense Tracker allows expenses and income to be recorded directly through Telegram.
-
-Example:
-
-```text
-Spent 250 on groceries
-````
-
-The system processes the message, identifies the transaction details, and stores the structured information in a Google Sheets budget tracker.
-
-### Features
-
-* 💸 Record expenses through Telegram
-* 💰 Record income
-* 🤖 Natural language transaction input
-* 📊 Google Sheets storage
-* 📅 Automatic date handling
-* 🧾 Transaction descriptions
-* 🔄 Easy access through Telegram
-
-The goal is to make expense tracking as simple as sending a message.
-
----
-
-## 🔔 Current Automations
+### Automated Notifications
 
 | Automation               | Description                                                                           |
 | ------------------------ | ------------------------------------------------------------------------------------- |
@@ -69,23 +120,129 @@ The goal is to make expense tracking as simple as sending a message.
 | Epic Games Notifications | Automatically notifies when new free Epic Games become available                      |
 | Expense Tracker          | Processes Telegram messages and stores financial transactions in Google Sheets        |
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 🛠️ Tech Stack
+<!-- BUILT WITH -->
+
+### Built With
+
+* [![Python][Python-badge]][Python-url]
+* [![Telegram][Telegram-badge]][Telegram-url]
+* [![Google Sheets][GoogleSheets-badge]][GoogleSheets-url]
+* [![GitHub Actions][GitHubActions-badge]][GitHubActions-url]
+* [![Render][Render-badge]][Render-url]
+
+Additional libraries and services used by the project include:
 
 * Python 3.12
 * python-telegram-bot
 * HTTPX
-* Telegram Bot API
-* Google Sheets API
 * CoinGecko API
-* GitHub Actions
-* Render
+* Google Sheets API
 * UptimeRobot
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 📂 Project Structure
+<!-- GETTING STARTED -->
+
+## Getting Started
+
+To get a local copy of the project up and running, follow these steps.
+
+### Prerequisites
+
+Before running the project, make sure you have:
+
+* Python 3.10 or later
+* Python 3.12 recommended
+* A Telegram account
+* A Telegram bot created using BotFather
+* Git
+* Google Cloud credentials if using the Expense Tracker
+
+### Installation
+
+1. Clone the repository
+
+   ```sh
+   git clone https://github.com/Abaan9350/telegram-automations.git
+   ```
+
+2. Navigate to the project directory
+
+   ```sh
+   cd telegram-automations
+   ```
+
+3. Install the required packages
+
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. Create a `.env` file in the project root
+
+   ```env
+   BOT_TOKEN=your_bot_token
+   TELEGRAM_CHAT_ID=your_chat_id
+   COINGECKO_API_KEY=your_coingecko_api_key
+   WEBHOOK_BASE_URL=your_render_url
+   WEBHOOK_SECRET=your_webhook_secret
+   ```
+
+5. Configure Google Sheets credentials if you are using the Expense Tracker.
+
+> Never commit your `.env` file, API keys, or private credentials to GitHub.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- USAGE EXAMPLES -->
+
+## Usage
+
+Once the bot is running, commands can be sent directly through Telegram.
+
+### Bitcoin Price
+
+```text
+/btcprice
+```
+
+Returns the current Bitcoin price along with its 24-hour price movement.
+
+### Epic Games
+
+```text
+/epicgames
+```
+
+Returns the currently available free games on the Epic Games Store.
+
+### Wordle
+
+```text
+/wordleanswer
+```
+
+Returns the current Wordle answer.
+
+### Expense Tracker
+
+Natural language messages can be used to record transactions.
+
+Example:
+
+```text
+Spent 250 on groceries
+```
+
+The transaction is processed and stored in the connected Google Sheets budget tracker.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- PROJECT STRUCTURE -->
+
+## Project Structure
 
 ```text
 telegram-automations/
@@ -125,110 +282,33 @@ telegram-automations/
 └── README.md
 ```
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 🚀 Getting Started
+<!-- DEPLOYMENT -->
 
-### Prerequisites
+## Deployment
 
-Before running the project, ensure you have:
+The project is designed to run in the cloud.
 
-* Python 3.10 or later
-* Python 3.12 recommended
-* A Telegram account
-* A Telegram bot created using BotFather
-* Git
-* Google Cloud credentials if using the Expense Tracker
+### Render
 
----
+The Telegram bot is hosted on Render for continuous availability.
 
-## 📥 Installation
+### GitHub Actions
 
-Clone the repository:
+Scheduled automations such as Bitcoin price alerts and Epic Games notifications are executed using GitHub Actions.
 
-```bash
-git clone https://github.com/Abaan9350/telegram-automations.git
-```
+### Uptime Monitoring
 
-Navigate to the project directory:
+UptimeRobot can be used to periodically ping the deployed service to help prevent the Render free service from becoming inactive.
 
-```bash
-cd telegram-automations
-```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-Install the required dependencies:
+<!-- SECURITY -->
 
-```bash
-pip install -r requirements.txt
-```
+## Security
 
----
-
-## ⚙️ Configuration
-
-Create a `.env` file in the project root.
-
-```env
-BOT_TOKEN=your_bot_token
-TELEGRAM_CHAT_ID=your_chat_id
-COINGECKO_API_KEY=your_coingecko_api_key
-WEBHOOK_BASE_URL=your_render_url
-WEBHOOK_SECRET=your_webhook_secret
-```
-
-For Google Sheets integration, configure the required Google credentials according to the project's service configuration.
-
-> Never commit your `.env` file, API keys, or private credentials to GitHub.
-
----
-
-## ▶️ Running Locally
-
-Start the Telegram bot:
-
-```bash
-python bot.py
-```
-
-Run an automation manually:
-
-```bash
-python scripts/btc_alert.py
-```
-
----
-
-## ☁️ Deployment
-
-The project is designed to run continuously in the cloud.
-
-### Telegram Bot
-
-The Telegram bot is hosted on **Render**.
-
-Render provides the cloud environment required to keep the bot available without running it manually on a local computer.
-
-### Keeping the Service Active
-
-An uptime monitoring service can periodically ping the deployed application to help prevent the free hosting service from becoming inactive.
-
-### Scheduled Automations
-
-Scheduled tasks such as Bitcoin alerts and Epic Games notifications can be executed using **GitHub Actions**.
-
-Deployment requires:
-
-* Installing dependencies from `requirements.txt`
-* Configuring environment variables
-* Deploying the application to Render
-* Configuring GitHub Actions
-* Configuring required external API credentials
-
----
-
-## 🔐 Security
-
-Sensitive information should **never** be committed to the repository.
+Sensitive information should never be committed to the repository.
 
 Examples include:
 
@@ -239,57 +319,13 @@ Examples include:
 * Private credentials
 * `.env` files
 
-Always use environment variables, GitHub Secrets, or appropriate secret management solutions.
+Use environment variables and GitHub Secrets wherever appropriate.
 
----
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## 🧩 Architecture
+<!-- ROADMAP -->
 
-The project separates different responsibilities into individual modules.
-
-```text
-                    ┌──────────────────┐
-                    │     Telegram     │
-                    │      User        │
-                    └────────┬─────────┘
-                             │
-                             ▼
-                    ┌──────────────────┐
-                    │  Telegram Bot    │
-                    │     bot.py       │
-                    └────────┬─────────┘
-                             │
-             ┌───────────────┼───────────────┐
-             ▼               ▼               ▼
-       ┌───────────┐   ┌────────────┐  ┌────────────┐
-       │ Commands  │   │  Services  │  │Automations │
-       └─────┬─────┘   └──────┬─────┘  └──────┬─────┘
-             │                │               │
-             ▼                ▼               ▼
-       Telegram         Google Sheets    GitHub Actions
-       Utilities        External APIs    Scheduled Tasks
-```
-
-This structure makes it easier to add new commands and integrations without modifying the entire application.
-
----
-
-## 🧩 Adding New Features
-
-The project follows a modular structure.
-
-To add a new feature:
-
-1. Create a command or automation script.
-2. Add any required service modules.
-3. Configure API keys or credentials if required.
-4. Register the command with the Telegram bot.
-5. Test locally.
-6. Deploy and verify.
-
----
-
-## 🚧 Roadmap
+## Roadmap
 
 ### Completed
 
@@ -302,7 +338,7 @@ To add a new feature:
 * [x] User Management
 * [x] Google Sheets Integration
 * [x] Telegram Expense Tracker
-* [x] Cloud Deployment with Render
+* [x] Render Deployment
 
 ### In Progress
 
@@ -324,21 +360,65 @@ To add a new feature:
 * [ ] Raspberry Pi deployment
 * [ ] Docker support
 
----
+See the [open issues](https://github.com/Abaan9350/telegram-automations/issues) for a full list of proposed features and improvements.
 
-## 🤝 Contributing
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-This project is currently maintained as a personal automation platform, but suggestions and improvements are always welcome.
+<!-- CONTRIBUTING -->
 
-Feel free to fork the repository, experiment with new automations, and submit pull requests.
+## Contributing
 
----
+This is currently a personal automation platform, but suggestions and improvements are always welcome.
 
-## 📄 License
+If you have an idea for a new automation or feature, feel free to open an issue or fork the project and experiment with it.
 
-This project is licensed under the **MIT License**.
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Feel free to use, modify, and build upon it for your own automation projects.
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-```
-```
+<!-- LICENSE -->
+
+## License
+
+Distributed under the MIT License. See `LICENSE.txt` for more information.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- CONTACT -->
+
+## Contact
+
+Abdurrahman - [@Abaan9350](https://github.com/Abaan9350) - [abaan9350@gmail.com](mailto:abaan9350@gmail.com)
+
+Project Link: [https://github.com/Abaan9350/telegram-automations](https://github.com/Abaan9350/telegram-automations)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MARKDOWN LINKS & IMAGES -->
+
+[contributors-shield]: https://img.shields.io/github/contributors/Abaan9350/telegram-automations.svg?style=for-the-badge
+[contributors-url]: https://github.com/Abaan9350/telegram-automations/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/Abaan9350/telegram-automations.svg?style=for-the-badge
+[forks-url]: https://github.com/Abaan9350/telegram-automations/network/members
+[stars-shield]: https://img.shields.io/github/stars/Abaan9350/telegram-automations.svg?style=for-the-badge
+[stars-url]: https://github.com/Abaan9350/telegram-automations/stargazers
+[issues-shield]: https://img.shields.io/github/issues/Abaan9350/telegram-automations.svg?style=for-the-badge
+[issues-url]: https://github.com/Abaan9350/telegram-automations/issues
+[license-shield]: https://img.shields.io/github/license/Abaan9350/telegram-automations.svg?style=for-the-badge
+[license-url]: https://github.com/Abaan9350/telegram-automations/blob/main/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/
+[Python-badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Python-url]: https://www.python.org/
+[Telegram-badge]: https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white
+[Telegram-url]: https://telegram.org/
+[GoogleSheets-badge]: https://img.shields.io/badge/Google%20Sheets-34A853?style=for-the-badge&logo=googlesheets&logoColor=white
+[GoogleSheets-url]: https://www.google.com/sheets/about/
+[GitHubActions-badge]: https://img.shields.io/badge/GitHub%20Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white
+[GitHubActions-url]: https://github.com/features/actions
+[Render-badge]: https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white
+[Render-url]: https://render.com/
