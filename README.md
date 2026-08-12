@@ -1,6 +1,3 @@
-Yep bro. Since this is the **Telegram Automations repo README**, I'd make it reflect what you've actually built now, especially the **Expense Tracker**, Render hosting, and the modular automation setup.
-
-````md
 # Telegram Automations 🤖
 
 > A personal automation hub powered by Telegram.
@@ -136,7 +133,8 @@ telegram-automations/
 
 Before running the project, ensure you have:
 
-* Python 3.10 or later (Python 3.12 recommended)
+* Python 3.10 or later
+* Python 3.12 recommended
 * A Telegram account
 * A Telegram bot created using BotFather
 * Git
@@ -313,7 +311,7 @@ To add a new feature:
 * [ ] Shared CoinGecko service
 * [ ] Improved logging
 * [ ] Better error handling
-* [ ] Improve expense categorization
+* [ ] Improved expense categorization
 
 ### Planned
 
@@ -343,6 +341,4 @@ This project is licensed under the **MIT License**.
 Feel free to use, modify, and build upon it for your own automation projects.
 
 ```
-
-**Summary:** This version makes the README look like an actual evolving automation platform rather than just a Telegram bot. The Expense Tracker is now a first-class feature, while Render, UptimeRobot, Google Sheets, and the modular architecture are properly represented.
 ```
