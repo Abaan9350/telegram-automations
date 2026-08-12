@@ -18,7 +18,16 @@ from services.google_sheets import (
 
 
 TRANSACTION_REGEX = re.compile(
-    r"^/(expense|income)\s+(.+?)\s+([1-9]\d*(?:\.\d{1,2})?)(?:\s+(.+))?$",
+    r"^/(expense|income)\s+(.+?)\s+([1-9]\d*(?:\.\d{1,2})?)"
+    r"(?:\s+(.+))?$",
+    re.IGNORECASE,
+)
+
+DATE_REGEX = re.compile(
+    r"^(.*?)(?:\s+)(\d{1,2})[ /-]"
+    r"(January|February|March|April|May|June|July|August|September|"
+    r"October|November|December|Jan|Feb|Mar|Apr|Jun|Jul|Aug|Sep|"
+    r"Oct|Nov|Dec)(?:\s+(\d{4}))?$",
     re.IGNORECASE,
 )
 
@@ -26,6 +35,61 @@ TRANSACTION_REGEX = re.compile(
 def is_admin(update: Update) -> bool:
     return update.effective_user.id == int(os.environ["ADMIN_ID"])
 
+
+def parse_date_and_description(description: str) -> tuple[str, str]:
+    if not description:
+        return (
+            datetime.now().strftime("%d %b %y").lstrip("0"),
+            "",
+        )
+
+    date_match = re.search(
+        r"(\d{1,2})\s+"
+        r"(January|February|March|April|May|June|July|August|"
+        r"September|October|November|December|"
+        r"Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+        r"(?:\s+(\d{4}))?$",
+        description.strip(),
+        re.IGNORECASE,
+    )
+
+    if not date_match:
+        return (
+            datetime.now().strftime("%d %b %y").lstrip("0"),
+            description.strip(),
+        )
+
+    day = int(date_match.group(1))
+    month_text = date_match.group(2)
+    year = (
+        int(date_match.group(3))
+        if date_match.group(3)
+        else datetime.now().year
+    )
+
+    try:
+        transaction_date = datetime.strptime(
+            f"{day} {month_text} {year}",
+            "%d %B %Y",
+        )
+    except ValueError:
+        try:
+            transaction_date = datetime.strptime(
+                f"{day} {month_text} {year}",
+                "%d %b %Y",
+            )
+        except ValueError:
+            return (
+                datetime.now().strftime("%d %b %y").lstrip("0"),
+                description.strip(),
+            )
+
+    remaining_description = description[:date_match.start()].strip()
+
+    return (
+        transaction_date.strftime("%d %b %y").lstrip("0"),
+        remaining_description,
+    )
 
 async def handle_transaction(
     update: Update,
@@ -46,18 +110,23 @@ async def handle_transaction(
             "Examples:\n"
             "/expense chicken 200\n"
             "/expense shoes 260 size 10\n"
+            "/expense ice cream 250 13 August\n"
             "/income salary 41667"
         )
         return
 
     _, item, amount, description = match.groups()
 
+    transaction_date, description = parse_date_and_description(
+        description or ""
+    )
+
     append_transaction(
-        date=datetime.now().strftime("%d %b %y").lstrip("0"),
+        date=transaction_date,
         item=item.strip(),
         amount=amount,
         transaction_type=transaction_type,
-        description=(description or "").strip(),
+        description=description,
     )
 
     await update.effective_message.reply_text(
