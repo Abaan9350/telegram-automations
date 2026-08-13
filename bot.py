@@ -21,6 +21,7 @@ from telegram.ext import (
 
 from commands import load_all, COMMAND_HANDLERS
 from commands.expense import undo_callback
+from commands.today import today_callback
 
 
 load_dotenv()
@@ -57,14 +58,24 @@ async def error_handler(
 
 async def prepare_polling(app: Application):
     try:
-        await app.bot.delete_webhook(drop_pending_updates=True)
-        logger.info("Webhook removed successfully.")
+        await app.bot.delete_webhook(
+            drop_pending_updates=True
+        )
+
+        logger.info(
+            "Webhook removed successfully."
+        )
+
     except TelegramError as e:
-        logger.warning(f"Couldn't remove webhook: {e}")
+        logger.warning(
+            f"Couldn't remove webhook: {e}"
+        )
 
 
 async def run_server(app: Application):
+
     async def telegram_webhook(request: Request):
+
         if WEBHOOK_SECRET:
             received_secret = request.headers.get(
                 "X-Telegram-Bot-Api-Secret-Token"
@@ -110,6 +121,7 @@ async def run_server(app: Application):
         ]
     )
 
+
     await app.bot.set_webhook(
         url=f"{WEBHOOK_BASE_URL}/{BOT_TOKEN}",
         secret_token=WEBHOOK_SECRET,
@@ -120,6 +132,7 @@ async def run_server(app: Application):
         f"Webhook set to: {WEBHOOK_BASE_URL}/{BOT_TOKEN}"
     )
 
+
     server = uvicorn.Server(
         uvicorn.Config(
             app=web_app,
@@ -129,6 +142,7 @@ async def run_server(app: Application):
         )
     )
 
+
     async with app:
         await app.start()
         await server.serve()
@@ -136,10 +150,16 @@ async def run_server(app: Application):
 
 
 def main():
+
+    # Automatically discover all commands
     load_all()
 
+
     if os.getenv("RENDER"):
-        logger.info("Running in WEBHOOK mode.")
+
+        logger.info(
+            "Running in WEBHOOK mode."
+        )
 
         app = (
             Application.builder()
@@ -149,7 +169,10 @@ def main():
         )
 
     else:
-        logger.info("Running in POLLING mode.")
+
+        logger.info(
+            "Running in POLLING mode."
+        )
 
         app = (
             Application.builder()
@@ -157,11 +180,19 @@ def main():
             .build()
         )
 
+
+    # Register all Telegram commands
     for name, handler_func, _ in COMMAND_HANDLERS:
+
         app.add_handler(
-            CommandHandler(name, handler_func)
+            CommandHandler(
+                name,
+                handler_func,
+            )
         )
 
+
+    # Expense undo buttons
     app.add_handler(
         CallbackQueryHandler(
             undo_callback,
@@ -169,12 +200,29 @@ def main():
         )
     )
 
-    app.add_error_handler(error_handler)
+
+    # /today selection buttons
+    app.add_handler(
+        CallbackQueryHandler(
+            today_callback,
+            pattern=r"^today_select:\d+$",
+        )
+    )
+
+
+    app.add_error_handler(
+        error_handler
+    )
+
 
     if os.getenv("RENDER"):
-        asyncio.run(run_server(app))
+
+        asyncio.run(
+            run_server(app)
+        )
 
     else:
+
         app.post_init = prepare_polling
 
         app.run_polling(

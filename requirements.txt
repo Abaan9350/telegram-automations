@@ -5,3 +5,4 @@ gspread
 google-auth
 starlette
 uvicorn
+google-genai
