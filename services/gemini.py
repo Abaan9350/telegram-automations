@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+
 load_dotenv()
-from google.genai import types
 
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
@@ -16,53 +16,31 @@ GEMINI_MODEL = os.getenv(
     "gemini-3.5-flash-lite",
 )
 
+
 client = genai.Client(
     api_key=GEMINI_API_KEY
 )
 
 
-EVENT_DISCOVERY_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "events": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "title": {
-                        "type": "string"
-                    },
-                    "year": {
-                        "type": "integer"
-                    },
-                    "category": {
-                        "type": "string"
-                    },
-                    "event": {
-                        "type": "string"
-                    },
-                    "source_url": {
-                        "type": "string"
-                    },
-                    "confidence": {
-                        "type": "integer"
-                    }
-                },
-                "required": [
-                    "title",
-                    "year",
-                    "category",
-                    "event",
-                    "source_url",
-                    "confidence"
-                ]
-            }
-        }
-    },
-    "required": [
-        "events"
-    ]
-}
+CATEGORIES = [
+    "History",
+    "Sports",
+    "Music",
+    "Movies & TV",
+    "Gaming",
+    "Technology",
+    "Science",
+    "Space",
+    "Business",
+    "India",
+    "Internet",
+    "People",
+    "Motorsport",
+    "Aviation",
+    "Books",
+    "Awards",
+    "Weird",
+]
 
 
 RANKING_SCHEMA = {
@@ -70,213 +48,231 @@ RANKING_SCHEMA = {
     "properties": {
         "selected_events": {
             "type": "array",
+            "minItems": 3,
+            "maxItems": 3,
             "items": {
                 "type": "object",
                 "properties": {
                     "candidate_index": {
-                        "type": "integer"
+                        "type": "integer",
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": CATEGORIES,
                     },
                     "reason": {
-                        "type": "string"
+                        "type": "string",
                     },
                     "score": {
-                        "type": "integer"
-                    }
+                        "type": "integer",
+                    },
                 },
                 "required": [
                     "candidate_index",
+                    "category",
                     "reason",
-                    "score"
-                ]
-            }
-        }
+                    "score",
+                ],
+            },
+        },
     },
     "required": [
-        "selected_events"
-    ]
+        "selected_events",
+    ],
 }
-
-
-async def discover_events(
-    date_text: str,
-) -> list[dict]:
-
-    prompt = f"""
-You are researching content for a daily "On This Day"
-social media account.
-
-Today's date is:
-
-{date_text}
-
-Find genuinely interesting events that happened on this
-EXACT calendar date in previous years.
-
-IMPORTANT:
-
-The event must have happened specifically on this month
-and day.
-
-Do NOT include:
-- events that merely happened during the same month
-- events that happened a few days before or after
-- ongoing events unless something specific happened on this date
-- anniversaries that are not tied to an actual event date
-- vague historical claims
-
-Search broadly across ALL categories.
-
-Possible categories include:
-- History
-- World events
-- India
-- Sports
-- Football
-- Cricket
-- Olympics
-- Music
-- Movies
-- Television
-- Gaming
-- Technology
-- Science
-- Space
-- Business
-- Internet culture
-- Cars
-- Aviation
-- Books
-- Awards
-- Famous people
-- Weird or unusual events
-
-Do not favor history.
-
-Look for events that would make a person think:
-
-"I didn't know that happened on this day."
-
-For every candidate provide:
-- exact event title
-- original event year
-- category
-- concise factual description
-- source URL
-- confidence from 1 to 10
-
-Only return events for which you can find a reliable
-source supporting the exact date.
-
-Return at least 15 candidates if enough genuine candidates
-exist.
-"""
-
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=EVENT_DISCOVERY_SCHEMA,
-            tools=[
-                types.Tool(
-                    google_search=types.GoogleSearch()
-                )
-            ],
-        ),
-    )
-
-    data = json.loads(
-        response.text
-    )
-
-    return data.get(
-        "events",
-        []
-    )
 
 
 async def rank_events(
     events: list[dict],
 ) -> list[dict]:
 
-    if not events:
-        return []
+    if len(events) < 3:
+        return events
 
-    candidates_text = []
+    candidates = []
 
-    for index, event in enumerate(
-        events
-    ):
+    for index, event in enumerate(events):
 
-        candidates_text.append(
+        candidates.append(
             f"""
 CANDIDATE {index}
 
 Title:
-{event.get("title")}
+{event.get("title", "")}
 
 Year:
-{event.get("year")}
+{event.get("year", "")}
 
-Category:
-{event.get("category")}
+Historical date:
+{event.get("display_date", "")}
+
+Original source category:
+{event.get("source_category", "")}
 
 Event:
-{event.get("event")}
+{event.get("event", "")}
+
+Description:
+{event.get("description", "")}
 
 Source:
-{event.get("source_url")}
+{event.get("source_url", "")}
 
-Research confidence:
-{event.get("confidence")}
+Image available:
+{"Yes" if event.get("image_url") else "No"}
 """
         )
+
+    candidates_text = "\n".join(
+        candidates
+    )
 
     prompt = f"""
 You are the editor for a social media account called
 "On This Day".
 
-You have been given historical events that have already
-been researched for the exact calendar date.
+You have a large collection of events that happened on
+the exact calendar date being researched.
 
-Your job is to select the THREE strongest candidates.
+Your job is to select EXACTLY THREE events that would make
+excellent social media posts.
 
-The account is NOT limited to history.
+The account is NOT a history account.
 
-A great candidate can come from:
-sports, music, movies, gaming, technology, science,
-space, business, India, internet culture, famous people,
-weird events, or traditional history.
+It covers interesting events from EVERY domain.
 
-Choose events that are:
+AVAILABLE CATEGORIES:
 
-1. Genuinely interesting.
-2. Broadly understandable.
-3. Strong enough to make a good Twitter/X post.
-4. Suitable for a Reddit post.
-5. Supported by a source.
-6. Distinct from one another when possible.
+{", ".join(CATEGORIES)}
+
+CATEGORY RULES:
+
+Every selected event MUST receive exactly one category
+from the list above.
+
+Do NOT use "General".
+
+Choose the category based on the actual subject of the
+event, not the source it came from.
+
+Examples:
+
+A football match:
+Sports
+
+A video game release:
+Gaming
+
+An album release:
+Music
+
+A movie premiere:
+Movies & TV
+
+A spacecraft launch:
+Space
+
+A scientific discovery:
+Science
+
+A company/product launch:
+Technology or Business
+
+An event specifically connected to India:
+India
+
+A famous person's birth/death:
+People
+
+A Formula 1 race:
+Motorsport
+
+An aircraft milestone:
+Aviation
+
+A strange or bizarre historical event:
+Weird
+
+A war or major historical event:
+History
+
+A Grammy/Oscar/major award:
+Awards
+
+SELECTION RULES:
+
+Prioritize events that make someone think:
+
+"I didn't know that happened on this day."
+
+Look for:
+
+- major firsts
+- famous achievements
+- surprising facts
+- iconic moments
+- major launches
+- important discoveries
+- famous sports moments
+- famous music/movie/gaming milestones
+- unusual events
+- culturally significant moments
+- events with strong storytelling potential
 
 Avoid:
-- boring administrative events
-- obscure events with no interesting angle
-- generic deaths/births unless the person is highly notable
-- events that are only interesting because they are old
-- duplicate or near-duplicate events
 
-IMPORTANT:
+- mundane events
+- extremely obscure events
+- generic births/deaths
+- events with little social-media potential
+- duplicate events
+- near-duplicate events
 
-Do NOT change facts.
+CATEGORY DIVERSITY:
 
-Do NOT change the event year.
+Try to select events from different categories.
 
-Do NOT invent details.
+For example, if there are strong candidates from
+Gaming, Sports and Music, prefer those over selecting
+three History events.
 
-Select exactly three candidates.
+However, NEVER sacrifice a dramatically better event
+just to force category diversity.
 
-Here are the candidates:
+FACTUAL ACCURACY:
 
-{"".join(candidates_text)}
+The candidates have already been researched.
+
+Do NOT:
+
+- invent facts
+- change dates
+- change years
+- invent sources
+- combine two candidates
+- add information not present in the candidates
+
+Select candidates only by their original candidate index.
+
+Return EXACTLY THREE candidates.
+
+For every selected candidate provide:
+
+candidate_index:
+The original candidate number.
+
+category:
+Exactly one category from the allowed list.
+
+reason:
+A short explanation of why this event is interesting.
+
+score:
+A score from 1 to 100 representing social-media potential.
+
+CANDIDATES:
+
+{candidates_text}
 """
 
     response = client.models.generate_content(
@@ -296,32 +292,269 @@ Here are the candidates:
 
     for item in data.get(
         "selected_events",
-        []
+        [],
     ):
 
         index = item.get(
             "candidate_index"
         )
 
-        if (
-            isinstance(index, int)
-            and 0 <= index < len(events)
-        ):
+        if not isinstance(index, int):
+            continue
 
-            event = events[index].copy()
+        if not 0 <= index < len(events):
+            continue
 
-            event["score"] = item.get(
-                "score",
-                0
-            )
+        event = events[index].copy()
 
-            event["reason"] = item.get(
-                "reason",
-                ""
-            )
+        category = item.get(
+            "category"
+        )
 
-            selected.append(
+        if category not in CATEGORIES:
+            category = infer_fallback_category(
                 event
             )
 
+        event["category"] = category
+
+        event["reason"] = item.get(
+            "reason",
+            "",
+        )
+
+        event["score"] = item.get(
+            "score",
+            0,
+        )
+
+        selected.append(event)
+
+    if len(selected) < 3:
+
+        fallback = events[:3]
+
+        for event in fallback:
+
+            event.setdefault(
+                "category",
+                infer_fallback_category(event),
+            )
+
+            event.setdefault(
+                "reason",
+                "",
+            )
+
+            event.setdefault(
+                "score",
+                0,
+            )
+
+        return fallback
+
     return selected[:3]
+
+
+def infer_fallback_category(
+    event: dict,
+) -> str:
+
+    text = (
+        f"{event.get('title', '')} "
+        f"{event.get('event', '')} "
+        f"{event.get('description', '')}"
+    ).lower()
+
+    if any(
+        word in text
+        for word in [
+            "football",
+            "soccer",
+            "cricket",
+            "olympic",
+            "tennis",
+            "basketball",
+            "championship",
+            "match",
+            "player",
+            "athlete",
+        ]
+    ):
+        return "Sports"
+
+    if any(
+        word in text
+        for word in [
+            "album",
+            "song",
+            "singer",
+            "music",
+            "band",
+            "concert",
+            "recording",
+        ]
+    ):
+        return "Music"
+
+    if any(
+        word in text
+        for word in [
+            "video game",
+            "game console",
+            "playstation",
+            "xbox",
+            "nintendo",
+            "arcade",
+        ]
+    ):
+        return "Gaming"
+
+    if any(
+        word in text
+        for word in [
+            "film",
+            "movie",
+            "television",
+            "tv series",
+            "actor",
+            "actress",
+        ]
+    ):
+        return "Movies & TV"
+
+    if any(
+        word in text
+        for word in [
+            "nasa",
+            "apollo",
+            "spacecraft",
+            "astronaut",
+            "moon landing",
+            "orbit",
+        ]
+    ):
+        return "Space"
+
+    if any(
+        word in text
+        for word in [
+            "scientist",
+            "discovery",
+            "experiment",
+            "research",
+            "theory",
+        ]
+    ):
+        return "Science"
+
+    if any(
+        word in text
+        for word in [
+            "internet",
+            "website",
+            "online",
+            "social media",
+            "viral",
+        ]
+    ):
+        return "Internet"
+
+    if any(
+        word in text
+        for word in [
+            "computer",
+            "software",
+            "technology",
+            "iphone",
+            "microsoft",
+            "apple",
+            "google",
+        ]
+    ):
+        return "Technology"
+
+    if any(
+        word in text
+        for word in [
+            "formula 1",
+            "formula one",
+            "f1",
+            "grand prix",
+            "racing",
+        ]
+    ):
+        return "Motorsport"
+
+    if any(
+        word in text
+        for word in [
+            "aircraft",
+            "airplane",
+            "aviation",
+            "flight",
+            "pilot",
+        ]
+    ):
+        return "Aviation"
+
+    if any(
+        word in text
+        for word in [
+            "book",
+            "novel",
+            "author",
+            "published",
+        ]
+    ):
+        return "Books"
+
+    if any(
+        word in text
+        for word in [
+            "oscar",
+            "grammy",
+            "emmy",
+            "award",
+            "prize",
+        ]
+    ):
+        return "Awards"
+
+    if any(
+        word in text
+        for word in [
+            "india",
+            "indian",
+            "delhi",
+            "mumbai",
+            "kolkata",
+            "chennai",
+        ]
+    ):
+        return "India"
+
+    if any(
+        word in text
+        for word in [
+            "company",
+            "corporation",
+            "business",
+            "founded",
+            "acquired",
+        ]
+    ):
+        return "Business"
+
+    if any(
+        word in text
+        for word in [
+            "born",
+            "died",
+            "death",
+            "birth",
+        ]
+    ):
+        return "People"
+
+    return "History"

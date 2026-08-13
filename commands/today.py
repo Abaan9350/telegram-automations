@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
+from io import BytesIO
 from zoneinfo import ZoneInfo
 
 from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    InputFile,
 )
 from telegram.ext import ContextTypes
 
@@ -19,11 +21,40 @@ from services.gemini import (
     rank_events,
 )
 
+from services.content_generator import (
+    generate_post_content,
+)
+
+from services.media import (
+    download_image,
+)
+
 
 TIMEZONE = os.getenv(
     "TIMEZONE",
     "Asia/Kolkata",
 )
+
+
+CATEGORY_EMOJIS = {
+    "History": "🌍",
+    "Sports": "⚽",
+    "Music": "🎵",
+    "Movies & TV": "🎬",
+    "Gaming": "🎮",
+    "Technology": "💻",
+    "Science": "🔬",
+    "Space": "🚀",
+    "Business": "💰",
+    "India": "🇮🇳",
+    "Internet": "🌐",
+    "People": "👤",
+    "Motorsport": "🏎️",
+    "Aviation": "✈️",
+    "Books": "📚",
+    "Awards": "🏆",
+    "Weird": "😂",
+}
 
 
 def get_today() -> datetime:
@@ -43,6 +74,18 @@ def format_age(
     return f"{years_ago} years ago"
 
 
+def format_category(
+    category: str,
+) -> str:
+
+    emoji = CATEGORY_EMOJIS.get(
+        category,
+        "📌",
+    )
+
+    return f"{emoji} {category}"
+
+
 def build_candidate_message(
     events: list[dict],
     today: datetime,
@@ -60,20 +103,29 @@ def build_candidate_message(
         1,
     ):
 
+        category = event.get(
+            "category",
+            "History",
+        )
+
         lines.extend(
             [
                 f"{index}️⃣ {event['title']}",
-                f"🕰️ {format_age(event['years_ago'])}",
-                f"🏷️ {event.get('category', 'General')}",
+                (
+                    f"🕰️ "
+                    f"{format_age(event['years_ago'])}"
+                ),
+                (
+                    f"🏷️ "
+                    f"{format_category(category)}"
+                ),
                 f"📚 {event['event']}",
                 "",
             ]
         )
 
-    lines.extend(
-        [
-            "👇 Choose an event:",
-        ]
+    lines.append(
+        "👇 Choose an event:"
     )
 
     return "\n".join(lines)
@@ -102,6 +154,76 @@ def build_keyboard(
     return InlineKeyboardMarkup(
         [buttons]
     )
+
+
+def build_post_preview(
+    event: dict,
+    content: dict,
+) -> str:
+
+    title = event.get(
+        "title",
+        "Unknown event",
+    )
+
+    display_date = event.get(
+        "display_date",
+        "",
+    )
+
+    category = event.get(
+        "category",
+        "History",
+    )
+
+    source_url = event.get(
+        "source_url"
+    )
+
+    lines = [
+        "🔥 READY TO POST",
+        "",
+        f"📌 {title}",
+        f"📅 {display_date}",
+        (
+            f"🏷️ "
+            f"{format_category(category)}"
+        ),
+        "",
+        "━━━━━━━━━━━━━━━━━━",
+        "🐦 TWITTER / X",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        content["twitter_body"],
+        "",
+        "━━━━━━━━━━━━━━━━━━",
+        "🔴 REDDIT",
+        "━━━━━━━━━━━━━━━━━━",
+        "",
+        (
+            f"📍 "
+            f"{content['reddit_subreddit']}"
+        ),
+        "",
+        "TITLE:",
+        content["reddit_title"],
+        "",
+        "BODY:",
+        content["reddit_body"],
+    ]
+
+    if source_url:
+
+        lines.extend(
+            [
+                "",
+                "━━━━━━━━━━━━━━━━━━",
+                "🔗 SOURCE",
+                source_url,
+            ]
+        )
+
+    return "\n".join(lines)
 
 
 @command(
@@ -157,8 +279,6 @@ async def today(
 
             return
 
-        # Store the three selected events
-        # for the Telegram buttons.
         context.user_data[
             "today_events"
         ] = top_events
@@ -224,69 +344,96 @@ async def today_callback(
 
         selected = events[index]
 
-        title = selected.get(
-            "title",
-            "Unknown event",
+        # ----------------------------------------------------
+        # Generate Twitter + Reddit content
+        # ----------------------------------------------------
+
+        await query.edit_message_text(
+            "🧠 Generating Twitter and "
+            "Reddit posts..."
         )
 
-        category = selected.get(
-            "category",
-            "General",
+        content = (
+            await generate_post_content(
+                selected
+            )
         )
 
-        source_url = selected.get(
-            "source_url"
+        # ----------------------------------------------------
+        # Build preview
+        # ----------------------------------------------------
+
+        preview = build_post_preview(
+            selected,
+            content,
         )
+
+        await query.message.reply_text(
+            preview,
+            disable_web_page_preview=True,
+        )
+
+        # ----------------------------------------------------
+        # Download image
+        # ----------------------------------------------------
 
         image_url = selected.get(
             "image_url"
         )
 
-        lines = [
-            "✅ EVENT SELECTED",
-            "",
-            f"📌 {title}",
-            "",
-            f"📅 {selected.get('display_date', '')}",
-            "",
-            f"🏷️ {category}",
-            "",
-            f"📚 {selected.get('event', '')}",
-        ]
-
-        if selected.get("reason"):
-
-            lines.extend(
-                [
-                    "",
-                    "🧠 Why Gemini picked it:",
-                    selected["reason"],
-                ]
-            )
-
-        if source_url:
-
-            lines.extend(
-                [
-                    "",
-                    "🔗 Source:",
-                    source_url,
-                ]
-            )
-
         if image_url:
 
-            lines.extend(
-                [
-                    "",
-                    "🖼️ Image:",
-                    image_url,
-                ]
+            image_bytes, extension = (
+                await download_image(
+                    image_url
+                )
             )
 
-        await query.edit_message_text(
-            "\n".join(lines),
-            disable_web_page_preview=False,
+            if image_bytes:
+
+                caption = (
+                    f"🖼️ Image for:\n"
+                    f"{selected.get('title', '')}\n\n"
+                    f"Source:\n"
+                    f"{image_url}"
+                )
+
+                photo_file = InputFile(
+                    BytesIO(image_bytes),
+                    filename=f"event.{extension}",
+                )
+
+                await query.message.reply_photo(
+                    photo=photo_file,
+                    caption=caption,
+                )
+
+            else:
+
+                await query.message.reply_text(
+                    "⚠️ I couldn't download "
+                    "the source image.\n\n"
+                    f"🖼️ Image URL:\n"
+                    f"{image_url}"
+                )
+
+        else:
+
+            await query.message.reply_text(
+                "⚠️ No image was available "
+                "for this event."
+            )
+
+        # ----------------------------------------------------
+        # Final confirmation
+        # ----------------------------------------------------
+
+        await query.message.reply_text(
+            "✅ Posting package ready.\n\n"
+            "🐦 Copy the Twitter text.\n"
+            "🔴 Copy the Reddit title and body.\n"
+            "🖼️ Download/save the image above.\n\n"
+            "Nothing has been posted automatically."
         )
 
     except Exception as e:
@@ -295,8 +442,18 @@ async def today_callback(
             f"today_callback error: {e}"
         )
 
-        await query.edit_message_text(
-            "⚠️ Something went wrong while "
-            "selecting that event.\n\n"
-            f"Error: {e}"
-        )
+        try:
+
+            await query.edit_message_text(
+                "⚠️ Something went wrong while "
+                "generating the posting package.\n\n"
+                f"Error: {e}"
+            )
+
+        except Exception:
+
+            await query.message.reply_text(
+                "⚠️ Something went wrong while "
+                "generating the posting package.\n\n"
+                f"Error: {e}"
+            )

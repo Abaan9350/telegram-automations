@@ -5,6 +5,10 @@ from typing import Any
 
 import httpx
 
+from services.additional_sources import (
+    fetch_additional_events,
+)
+
 
 WIKIMEDIA_URL = (
     "https://en.wikipedia.org/api/rest_v1/"
@@ -26,7 +30,51 @@ async def fetch_today_events(
     target_date: date | None = None,
 ) -> list[dict[str, Any]]:
 
-    target_date = target_date or date.today()
+    target_date = (
+        target_date
+        or date.today()
+    )
+
+    # --------------------------------------------------------
+    # Source 1: Wikimedia
+    # --------------------------------------------------------
+
+    wikipedia_events = (
+        await fetch_wikimedia_events(
+            target_date
+        )
+    )
+
+    # --------------------------------------------------------
+    # Source 2+: Sports + Music
+    # --------------------------------------------------------
+
+    additional_events = (
+        await fetch_additional_events(
+            target_date
+        )
+    )
+
+    # --------------------------------------------------------
+    # Combine everything
+    # --------------------------------------------------------
+
+    all_events = (
+        wikipedia_events
+        + additional_events
+    )
+
+    # Remove duplicates.
+    all_events = deduplicate_events(
+        all_events
+    )
+
+    return all_events
+
+
+async def fetch_wikimedia_events(
+    target_date: date,
+) -> list[dict[str, Any]]:
 
     url = WIKIMEDIA_URL.format(
         month=target_date.month,
@@ -38,16 +86,16 @@ async def fetch_today_events(
         headers=HEADERS,
     ) as client:
 
-        response = await client.get(url)
+        response = await client.get(
+            url
+        )
+
         response.raise_for_status()
 
         data = response.json()
 
     candidates = []
 
-    # The "all" feed can contain several categories.
-    # We deliberately collect everything and let Gemini
-    # decide what is interesting.
     for category in (
         "selected",
         "events",
@@ -55,7 +103,10 @@ async def fetch_today_events(
         "deaths",
     ):
 
-        for item in data.get(category, []):
+        for item in data.get(
+            category,
+            [],
+        ):
 
             candidate = parse_event(
                 item=item,
@@ -64,9 +115,12 @@ async def fetch_today_events(
             )
 
             if candidate:
-                candidates.append(candidate)
 
-    return deduplicate_events(candidates)
+                candidates.append(
+                    candidate
+                )
+
+    return candidates
 
 
 def parse_event(
@@ -84,14 +138,19 @@ def parse_event(
     if year is None or not text:
         return None
 
-    pages = item.get("pages") or []
+    pages = item.get(
+        "pages"
+    ) or []
 
     if not pages:
         return None
 
     page = pages[0]
 
-    titles = page.get("titles") or {}
+    titles = (
+        page.get("titles")
+        or {}
+    )
 
     title = clean_text(
         titles.get("display")
@@ -110,34 +169,46 @@ def parse_event(
         or ""
     )
 
-    content_urls = page.get(
-        "content_urls",
-        {},
+    content_urls = (
+        page.get(
+            "content_urls",
+            {},
+        )
+        or {}
     )
 
-    source_url = (
+    desktop_url = (
         content_urls
         .get("desktop", {})
         .get("page")
     )
 
-    thumbnail = page.get(
-        "thumbnail"
-    ) or {}
+    thumbnail = (
+        page.get(
+            "thumbnail"
+        )
+        or {}
+    )
 
-    original_image = page.get(
-        "originalimage"
-    ) or {}
+    original_image = (
+        page.get(
+            "originalimage"
+        )
+        or {}
+    )
 
     image_url = (
-        original_image.get("source")
-        or thumbnail.get("source")
+        original_image.get(
+            "source"
+        )
+        or thumbnail.get(
+            "source"
+        )
     )
 
     year = int(year)
 
-    # Wikimedia can represent BCE years using
-    # negative numbers.
+    # Wikimedia uses negative years for BCE.
     if year < 0:
 
         historical_year = (
@@ -145,7 +216,8 @@ def parse_event(
         )
 
         years_ago = (
-            target_date.year + abs(year)
+            target_date.year
+            + abs(year)
         )
 
     elif year == 0:
@@ -184,28 +256,32 @@ def parse_event(
         "event": text,
         "description": description,
         "extract": extract,
-        "source_url": source_url,
+        "source_url": desktop_url,
         "image_url": image_url,
     }
 
 
-def clean_text(value: str) -> str:
+def clean_text(
+    value: str,
+) -> str:
 
     if not value:
         return ""
 
-    value = html.unescape(value)
+    value = html.unescape(
+        value
+    )
 
-    # Remove HTML tags properly.
     value = re.sub(
         r"<[^>]+>",
         "",
         value,
     )
 
-    value = html.unescape(value)
+    value = html.unescape(
+        value
+    )
 
-    # Normalize whitespace.
     value = " ".join(
         value.split()
     )
@@ -218,20 +294,42 @@ def deduplicate_events(
 ) -> list[dict[str, Any]]:
 
     seen = set()
+
     unique = []
 
     for event in events:
 
+        title = (
+            event.get(
+                "title",
+                "",
+            )
+            .lower()
+            .strip()
+        )
+
+        event_text = (
+            event.get(
+                "event",
+                "",
+            )
+            .lower()
+            .strip()
+        )
+
         key = (
-            event["year"],
-            event["title"].lower().strip(),
-            event["event"].lower().strip(),
+            event.get("year"),
+            title,
+            event_text,
         )
 
         if key in seen:
             continue
 
         seen.add(key)
-        unique.append(event)
+
+        unique.append(
+            event
+        )
 
     return unique
