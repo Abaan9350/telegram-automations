@@ -9,13 +9,16 @@ from config import REQUEST_TIMEOUT
 
 STATE_FILE = "state/btc_alert_state.json"
 
+# Minimum time between Bitcoin alerts
+COOLDOWN_SECONDS = 24 * 60 * 60
+
 
 def load_state():
     if os.path.exists(STATE_FILE):
         with open(STATE_FILE) as f:
             return json.load(f)
 
-    return {"alerted": False}
+    return {"last_alert_at": 0}
 
 
 def save_state(state):
@@ -88,10 +91,22 @@ def main():
 
     state = load_state()
 
+    # Check whether Bitcoin has crossed the configured threshold
     crossed = abs(change) >= BTC_ALERT_THRESHOLD
 
-    # Threshold crossed and alert hasn't been sent yet
-    if crossed and not state.get("alerted", False):
+    # Current time
+    now = time.time()
+
+    # Time when the previous alert was sent
+    last_alert_at = state.get("last_alert_at", 0)
+
+    # Check whether the 24-hour cooldown has expired
+    cooldown_over = (now - last_alert_at) >= COOLDOWN_SECONDS
+
+    # Send an alert only when:
+    # 1. Bitcoin is currently above/below the configured threshold
+    # 2. At least 24 hours have passed since the previous alert
+    if crossed and cooldown_over:
         direction = "📈" if change > 0 else "📉"
 
         send_telegram_message(
@@ -100,13 +115,26 @@ def main():
             f"💰 *Current Price:* `${price:,.2f}`"
         )
 
-        state["alerted"] = True
+        # Record the exact time the alert was sent
+        state["last_alert_at"] = now
         save_state(state)
 
-    # Threshold no longer crossed, reset the alert state
-    elif not crossed and state.get("alerted", False):
-        state["alerted"] = False
-        save_state(state)
+        print("BTC alert sent successfully.")
+
+    else:
+        if not crossed:
+            print(
+                f"Threshold not crossed. "
+                f"Current 24h change: {change:+.2f}%"
+            )
+        else:
+            remaining = COOLDOWN_SECONDS - (now - last_alert_at)
+            remaining_hours = remaining / 3600
+
+            print(
+                f"Threshold crossed, but cooldown is active. "
+                f"Approximately {remaining_hours:.1f} hours remaining."
+            )
 
 
 if __name__ == "__main__":
