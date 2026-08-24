@@ -53,14 +53,14 @@ async def fetch_sports_events(
     target_date: date,
 ) -> list[dict[str, Any]]:
 
-    events = []
-
     async with httpx.AsyncClient(
         timeout=TIMEOUT,
         headers={
             "User-Agent": USER_AGENT,
         },
     ) as client:
+
+        tasks = []
 
         for years_ago in LOOKBACK_YEARS:
 
@@ -74,26 +74,34 @@ async def fetch_sports_events(
                 target_date.day,
             )
 
-            try:
-
-                results = await fetch_sports_day(
+            tasks.append(
+                fetch_sports_day(
                     client=client,
                     historical_date=historical_date,
                     years_ago=years_ago,
                 )
+            )
 
-                events.extend(results)
+        results = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
 
-            except Exception as e:
+        events = []
 
+        for result in results:
+
+            if isinstance(
+                result,
+                Exception,
+            ):
                 print(
                     "Sports source error:",
-                    e,
+                    result,
                 )
+                continue
 
-            # Keep comfortably below the free
-            # API's documented rate limit.
-            await asyncio.sleep(0.5)
+            events.extend(result)
 
     return events
 
@@ -270,12 +278,12 @@ async def fetch_music_events(
     target_date: date,
 ) -> list[dict[str, Any]]:
 
-    events = []
-
     async with httpx.AsyncClient(
         timeout=TIMEOUT,
         headers=MUSICBRAINZ_HEADERS,
     ) as client:
+
+        tasks = []
 
         for years_ago in LOOKBACK_YEARS:
 
@@ -289,26 +297,34 @@ async def fetch_music_events(
                 target_date.day,
             )
 
-            try:
-
-                results = await fetch_music_day(
+            tasks.append(
+                fetch_music_day(
                     client=client,
                     historical_date=historical_date,
                     years_ago=years_ago,
                 )
+            )
 
-                events.extend(results)
+        results = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
 
-            except Exception as e:
+        events = []
 
+        for result in results:
+
+            if isinstance(
+                result,
+                Exception,
+            ):
                 print(
                     "Music source error:",
-                    e,
+                    result,
                 )
+                continue
 
-            # MusicBrainz asks clients to
-            # be considerate with request rate.
-            await asyncio.sleep(1.1)
+            events.extend(result)
 
     return events
 
@@ -488,8 +504,6 @@ async def fetch_tmdb_events(
 
         return []
 
-    events = []
-
     headers = {
         "Authorization": (
             f"Bearer {TMDB_API_TOKEN}"
@@ -503,6 +517,8 @@ async def fetch_tmdb_events(
         headers=headers,
     ) as client:
 
+        tasks = []
+
         for years_ago in LOOKBACK_YEARS:
 
             historical_year = (
@@ -515,30 +531,43 @@ async def fetch_tmdb_events(
                 target_date.day,
             )
 
-            try:
-
-                movies = await fetch_tmdb_movies(
+            # Create tasks for both movies and TV for this year
+            tasks.append(
+                fetch_tmdb_movies(
                     client,
                     historical_date,
                     years_ago,
                 )
+            )
 
-                events.extend(movies)
-
-                tv = await fetch_tmdb_tv(
+            tasks.append(
+                fetch_tmdb_tv(
                     client,
                     historical_date,
                     years_ago,
                 )
+            )
 
-                events.extend(tv)
+        results = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
 
-            except Exception as e:
+        events = []
 
+        for result in results:
+
+            if isinstance(
+                result,
+                Exception,
+            ):
                 print(
                     "TMDB source error:",
-                    e,
+                    result,
                 )
+                continue
+
+            events.extend(result)
 
     return events
 
@@ -848,8 +877,6 @@ async def fetch_gaming_events(
 
         return []
 
-    events = []
-
     async with httpx.AsyncClient(
         timeout=TIMEOUT,
         headers={
@@ -872,6 +899,8 @@ async def fetch_gaming_events(
             "User-Agent": USER_AGENT,
         }
 
+        tasks = []
+
         for years_ago in LOOKBACK_YEARS:
 
             historical_year = (
@@ -884,27 +913,35 @@ async def fetch_gaming_events(
                 target_date.day,
             )
 
-            try:
-
-                results = (
-                    await fetch_igdb_day(
-                        client=client,
-                        headers=headers,
-                        historical_date=historical_date,
-                        years_ago=years_ago,
-                    )
+            tasks.append(
+                fetch_igdb_day(
+                    client=client,
+                    headers=headers,
+                    historical_date=historical_date,
+                    years_ago=years_ago,
                 )
+            )
 
-                events.extend(
-                    results
-                )
+        results = await asyncio.gather(
+            *tasks,
+            return_exceptions=True,
+        )
 
-            except Exception as e:
+        events = []
 
+        for result in results:
+
+            if isinstance(
+                result,
+                Exception,
+            ):
                 print(
                     "IGDB source error:",
-                    e,
+                    result,
                 )
+                continue
+
+            events.extend(result)
 
     return events
 
