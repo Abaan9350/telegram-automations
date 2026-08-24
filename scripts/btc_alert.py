@@ -35,8 +35,11 @@ def get_btc_price_and_change():
         "ids": "bitcoin",
         "vs_currencies": "usd",
         "include_24hr_change": "true",
-        "x_cg_demo_api_key": os.environ["COINGECKO_API_KEY"],
     }
+    # Add API key if available (optional for public API)
+    api_key = os.getenv("COINGECKO_API_KEY")
+    if api_key:
+        params["x_cg_demo_api_key"] = api_key
 
     with httpx.Client(timeout=REQUEST_TIMEOUT) as client:
         for attempt in range(3):

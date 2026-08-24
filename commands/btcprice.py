@@ -14,8 +14,12 @@ async def fetch_btc_data():
         "ids": "bitcoin",
         "vs_currencies": "usd",
         "include_24hr_change": "true",
-        "x_cg_demo_api_key": os.environ["COINGECKO_API_KEY"],
     }
+    # Add API key if available (optional for public API)
+    api_key = os.getenv("COINGECKO_API_KEY")
+    if api_key:
+        params["x_cg_demo_api_key"] = api_key
+
     async with httpx.AsyncClient(timeout=10) as client:
         for attempt in range(3):
             resp = await client.get(COINGECKO_URL, params=params)
@@ -23,7 +27,8 @@ async def fetch_btc_data():
                 await asyncio.sleep(2 ** attempt)  # 1s, 2s backoff
                 continue
             resp.raise_for_status()
-            return resp.json()["bitcoin"]
+            data = resp.json()
+            return data["bitcoin"]
 
 @command("btcprice")
 async def btcprice(update: Update, context: ContextTypes.DEFAULT_TYPE):
