@@ -10,7 +10,7 @@ NYT_URL = "https://www.nytimes.com/svc/wordle/v2/{date}.json"
 
 @command("wordleanswer", "Get today's Wordle answer")
 async def wordleanswer(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    is_new = save_user(update.effective_user)
+    is_new = await save_user(update.effective_user)
     await notify_admin(context, update.effective_user, "/wordleanswer", is_new)
     today = datetime.date.today().isoformat()
     url = NYT_URL.format(date=today)

@@ -27,7 +27,7 @@ async def fetch_btc_data():
 
 @command("btcprice")
 async def btcprice(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    is_new = save_user(update.effective_user)
+    is_new = await save_user(update.effective_user)
     await notify_admin(context, update.effective_user, "/btcprice", is_new)
 
     try:

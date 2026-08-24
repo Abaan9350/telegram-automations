@@ -6,3 +6,4 @@ google-auth
 starlette
 uvicorn
 google-genai
+aiosqlite

@@ -14,7 +14,7 @@ async def users(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ You are not authorized.")
         return
 
-    users = get_all_users()
+    users = await get_all_users()
 
     if not users:
         await update.message.reply_text("No users found.")

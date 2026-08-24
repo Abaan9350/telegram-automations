@@ -94,7 +94,7 @@ async def fetch_free_games():
 
 @command("steamgames", "Get currently free Steam games")
 async def steamgames(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    is_new = save_user(update.effective_user)
+    is_new = await save_user(update.effective_user)
 
     await notify_admin(
         context,
