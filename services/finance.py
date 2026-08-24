@@ -76,8 +76,8 @@ def get_all_months_data() -> list[dict]:
                 item = row[1].strip()
                 expense_str = row[2].strip()
                 income_str = row[3].strip()
-                description = row[4].strip() if len(row) > 4 else ""
-                category = row[5].strip() if len(row) > 5 else ""
+                description = row[5].strip() if len(row) > 5 else ""
+                category = row[6].strip() if len(row) > 6 else ""
 
                 if not date_str:
                     continue
@@ -92,8 +92,8 @@ def get_all_months_data() -> list[dict]:
                     except ValueError:
                         continue
 
-                expense = float(expense_str) if expense_str else 0
-                income = float(income_str) if income_str else 0
+                expense = float(expense_str.replace(',', '')) if expense_str else 0
+                income = float(income_str.replace(',', '')) if income_str else 0
 
                 if expense > 0 or income > 0:
                     all_transactions.append({
@@ -117,10 +117,10 @@ def infer_category(item: str, description: str) -> str:
     text = f"{item} {description}".lower()
 
     categories = {
-        "food": ["food", "restaurant", "cafe", "coffee", "lunch", "dinner", "breakfast", "groceries", "grocery", "zomato", "swiggy", "delivery", "meal", "eat", "snack", "drink", "water", "juice", "beer", "wine", "alcohol"],
+        "food": ["food", "restaurant", "cafe", "coffee", "lunch", "dinner", "breakfast", "groceries", "grocery", "zomato", "swiggy", "delivery", "meal", "eat", "snack", "drink", "water", "juice", "beer", "wine", "alcohol", "ice cream", "icecream", "dessert", "cake", "chocolate", "pizza", "burger", "sandwich", "mamma"],
         "transport": ["uber", "ola", "taxi", "cab", "auto", "metro", "bus", "train", "fuel", "petrol", "diesel", "parking", "toll", "transport", "travel", "flight", "ticket"],
         "shopping": ["amazon", "flipkart", "shopping", "clothes", "clothing", "shoes", "shirt", "pants", "dress", "electronics", "phone", "laptop", "gadget", "accessory", "bag", "watch", "jewelry", "cosmetic", "makeup", "skincare"],
-        "entertainment": ["movie", "cinema", "theatre", "netflix", "prime", "hotstar", "spotify", "subscription", "game", "gaming", "concert", "event", "party", "club", "bar", "pub", "entertainment"],
+        "entertainment": ["movie", "cinema", "theatre", "netflix", "prime", "hotstar", "spotify", "subscription", "game", "gaming", "concert", "event", "party", "club", "bar", "pub", "entertainment", "turf", "agnels", "sports", "football", "cricket", "tennis", "badminton", "gym", "fitness"],
         "health": ["medicine", "pharmacy", "doctor", "hospital", "clinic", "medical", "health", "dental", "eye", "checkup", "test", "lab", "insurance", "gym", "fitness", "yoga", "therapy"],
         "utilities": ["electricity", "water", "gas", "internet", "wifi", "broadband", "mobile", "phone bill", "recharge", "utility", "bill", "rent", "maintenance"],
         "education": ["course", "book", "education", "learning", "training", "certification", "udemy", "coursera", "workshop", "seminar"],
@@ -192,7 +192,10 @@ async def analyze_financial_data(transactions: list[dict]) -> dict:
 
     # 6-month average
     six_months_ago = datetime.now(ZoneInfo(TIMEZONE)) - timedelta(days=180)
-    six_month_transactions = [t for t in transactions if t["date"] >= six_months_ago]
+    six_month_transactions = [
+        t for t in transactions
+        if t["date"].replace(tzinfo=ZoneInfo(TIMEZONE)) >= six_months_ago
+    ]
     six_month_expense = sum(t["expense"] for t in six_month_transactions)
     six_month_avg = six_month_expense / 6 if six_month_transactions else 0
 
