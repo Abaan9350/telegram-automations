@@ -5,9 +5,6 @@ on:
     - cron: '0 */6 * * *'
   workflow_dispatch: {}
 
-permissions:
-  contents: write
-
 jobs:
   check-steam:
     runs-on: ubuntu-latest
@@ -21,19 +18,22 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: Restore Steam alert state from cache
+        uses: actions/cache/restore@v4
+        with:
+          path: state/steam_alert_state.json
+          key: steam-alert-state
+          restore-keys: |
+            steam-alert-state
+
       - name: Run Steam free game alert check
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           STEAM_GAMES_CHAT_IDS: ${{ secrets.STEAM_GAMES_CHAT_IDS }}
         run: python scripts/steam_alert.py
 
-      - name: Commit updated state
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git add state/steam_alert_state.json
-
-          git diff --cached --quiet || git commit -m "Update Steam Games alert state [skip ci]"
-
-          git push
+      - name: Save Steam alert state to cache
+        uses: actions/cache/save@v4
+        with:
+          path: state/steam_alert_state.json
+          key: steam-alert-state-${{ github.run_id }}

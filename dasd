@@ -1,0 +1,49 @@
+[1mdiff --git a/.github/workflows/steam-alert.yml b/.github/workflows/steam-alert.yml[m
+[1mindex e817a2b..a9d8ac4 100644[m
+[1m--- a/.github/workflows/steam-alert.yml[m
+[1m+++ b/.github/workflows/steam-alert.yml[m
+[36m@@ -5,9 +5,6 @@[m [mon:[m
+     - cron: '0 */6 * * *'[m
+   workflow_dispatch: {}[m
+ [m
+[31m-permissions:[m
+[31m-  contents: write[m
+[31m-[m
+ jobs:[m
+   check-steam:[m
+     runs-on: ubuntu-latest[m
+[36m@@ -21,19 +18,22 @@[m [mjobs:[m
+ [m
+       - run: pip install -r requirements.txt[m
+ [m
+[32m+[m[32m      - name: Restore Steam alert state from cache[m
+[32m+[m[32m        uses: actions/cache/restore@v4[m
+[32m+[m[32m        with:[m
+[32m+[m[32m          path: state/steam_alert_state.json[m
+[32m+[m[32m          key: steam-alert-state[m
+[32m+[m[32m          restore-keys: |[m
+[32m+[m[32m            steam-alert-state[m
+[32m+[m
+       - name: Run Steam free game alert check[m
+         env:[m
+           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}[m
+           STEAM_GAMES_CHAT_IDS: ${{ secrets.STEAM_GAMES_CHAT_IDS }}[m
+         run: python scripts/steam_alert.py[m
+ [m
+[31m-      - name: Commit updated state[m
+[31m-        run: |[m
+[31m-          git config user.name "github-actions[bot]"[m
+[31m-          git config user.email "github-actions[bot]@users.noreply.github.com"[m
+[31m-[m
+[31m-          git add state/steam_alert_state.json[m
+[31m-[m
+[31m-          git diff --cached --quiet || git commit -m "Update Steam Games alert state [skip ci]"[m
+[31m-[m
+[31m-          git push[m
+\ No newline at end of file[m
+[32m+[m[32m      - name: Save Steam alert state to cache[m
+[32m+[m[32m        uses: actions/cache/save@v4[m
+[32m+[m[32m        with:[m
+[32m+[m[32m          path: state/steam_alert_state.json[m
+[32m+[m[32m          key: steam-alert-state-${{ github.run_id }}[m
+\ No newline at end of file[m
