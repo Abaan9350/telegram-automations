@@ -18,7 +18,7 @@ from services.google_sheets import (
 
 
 TRANSACTION_REGEX = re.compile(
-    r"^/(expense|income)\s+(.+?)\s+([1-9]\d*(?:\.\d{1,2})?)"
+    r"^/(expense|income|expensecash|incomecash)\s+(.+?)\s+([1-9]\d*(?:\.\d{1,2})?)"
     r"(?:\s+(.+))?$",
     re.IGNORECASE,
 )
@@ -94,6 +94,7 @@ def parse_date_and_description(description: str) -> tuple[str, str]:
 async def handle_transaction(
     update: Update,
     transaction_type: str,
+    payment_method: str = "Bank",
 ):
     if not is_admin(update):
         await update.effective_message.reply_text(
@@ -111,11 +112,21 @@ async def handle_transaction(
             "/expense chicken 200\n"
             "/expense shoes 260 size 10\n"
             "/expense ice cream 250 13 August\n"
-            "/income salary 41667"
+            "/income salary 41667\n"
+            "/expensecash turf 200\n"
+            "/incomecash tips 500"
         )
         return
 
-    _, item, amount, description = match.groups()
+    command, item, amount, description = match.groups()
+
+    # Determine payment method from command
+    if "cash" in command.lower():
+        payment_method = "Cash"
+        # Extract base transaction type (expense or income)
+        transaction_type = "expense" if "expense" in command.lower() else "income"
+    else:
+        payment_method = "Bank"
 
     transaction_date, description = parse_date_and_description(
         description or ""
@@ -127,10 +138,11 @@ async def handle_transaction(
         amount=amount,
         transaction_type=transaction_type,
         description=description,
+        payment_method=payment_method,
     )
 
     await update.effective_message.reply_text(
-        f"✅ {transaction_type.capitalize()} added: "
+        f"✅ {transaction_type.capitalize()} added ({payment_method}): "
         f"₹{amount} for {item.strip()}"
     )
 
@@ -149,6 +161,22 @@ async def income(
     context: ContextTypes.DEFAULT_TYPE,
 ):
     await handle_transaction(update, "income")
+
+
+@command("expensecash", "Add a cash expense")
+async def expensecash(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    await handle_transaction(update, "expense", payment_method="Cash")
+
+
+@command("incomecash", "Add cash income")
+async def incomecash(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    await handle_transaction(update, "income", payment_method="Cash")
 
 
 @command("undoexpense", "Undo the most recent expense")

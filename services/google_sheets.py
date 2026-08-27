@@ -54,6 +54,7 @@ def append_transaction(
     amount: str,
     transaction_type: str,
     description: str,
+    payment_method: str = "Bank",
 ):
     sheet = get_sheet()
 
@@ -62,10 +63,12 @@ def append_transaction(
     expense = amount if transaction_type == "expense" else ""
     income = amount if transaction_type == "income" else ""
 
+    # Column E (Remaining) should ONLY track Bank balance
+    # Use SUMIF to filter only Bank transactions from column G (Payment Method)
     remaining_formula = (
         f'=IF(OR(C{next_row}<>"",D{next_row}<>""),'
-        f'SUM($D$2:INDEX(D:D,ROW()))-'
-        f'SUM($C$2:INDEX(C:C,ROW())),"")'
+        f'SUMIF($G$2:$G{next_row},"Bank",$D$2:$D{next_row})-'
+        f'SUMIF($G$2:$G{next_row},"Bank",$C$2:$C{next_row}),"")'
     )
 
     row = [
@@ -75,6 +78,7 @@ def append_transaction(
         income,
         remaining_formula,
         description,
+        payment_method,
         "",
     ]
 
