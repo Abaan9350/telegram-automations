@@ -20,7 +20,6 @@ from telegram.ext import (
 )
 
 from commands import load_all, COMMAND_HANDLERS
-from commands.expense import undo_callback
 from commands.today import today_callback
 
 
@@ -190,15 +189,6 @@ def main():
                 handler_func,
             )
         )
-
-
-    # Expense undo buttons
-    app.add_handler(
-        CallbackQueryHandler(
-            undo_callback,
-            pattern=r"^undo_(yes|no)(:\d+)?$",
-        )
-    )
 
 
     # /today selection buttons
