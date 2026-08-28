@@ -20,7 +20,7 @@
   <p align="center">
     A personal automation hub powered by Telegram and AI.
     <br />
-    Track expenses, discover historical events, monitor crypto, get free game alerts, and more—all through Telegram.
+    Discover historical events, monitor crypto, get free game alerts, and more—all through Telegram.
     <br />
     <br />
     <a href="https://github.com/Abaan9350/telegram-automations">View Repository</a>
@@ -79,8 +79,6 @@ The project follows a modular architecture, making it easy to add new commands, 
 - 🤖 **Telegram Bot** - Natural language interface for all automations
 - 🧠 **AI-Powered Content** - Google Gemini ranks and generates social media content
 - 📅 **Historical Events** - Discover interesting events from "this day in history"
-- 💰 **Expense Tracking** - Natural language expense and income recording
-- 📊 **Google Sheets Integration** - Automatic financial tracking
 - ₿ **Bitcoin Monitoring** - Real-time price tracking and automated alerts
 - 🎮 **Free Game Alerts** - Automated notifications for Epic Games and Steam
 - 🎬 **Multi-Source Events** - Sports, music, movies, TV, gaming, and Wikipedia
@@ -97,7 +95,6 @@ The project follows a modular architecture, making it easy to add new commands, 
 * [![Python][Python-badge]][Python-url]
 * [![Telegram][Telegram-badge]][Telegram-url]
 * [![Google Gemini][Gemini-badge]][Gemini-url]
-* [![Google Sheets][GoogleSheets-badge]][GoogleSheets-url]
 * [![GitHub Actions][GitHubActions-badge]][GitHubActions-url]
 * [![Render][Render-badge]][Render-url]
 
@@ -116,7 +113,6 @@ The project follows a modular architecture, making it easy to add new commands, 
 * TMDB (The Movie Database)
 * IGDB (Internet Game Database)
 * CoinGecko API
-* Google Sheets API
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -137,7 +133,6 @@ Before running the project, ensure you have:
 * **API Keys** (depending on features you want to use):
   - Google Gemini API key (for `/today` command)
   - CoinGecko API key (for Bitcoin tracking)
-  - Google Cloud credentials (for expense tracking)
   - TMDB API token (optional, for movies/TV)
   - IGDB credentials (optional, for gaming)
 
@@ -211,12 +206,6 @@ COINGECKO_API_KEY=your_coingecko_api_key
 TELEGRAM_CHAT_ID=your_chat_id
 ```
 
-**For expense tracking:**
-```env
-SPREADSHEET_ID=your_google_sheets_id
-GOOGLE_CREDENTIALS={"type":"service_account",...}
-```
-
 **For free game alerts:**
 ```env
 EPIC_GAMES_CHAT_IDS=123456789,987654321
@@ -243,9 +232,6 @@ RENDER=true
 | --------------- | --------------------------------------------------------------------------- |
 | `/today`        | 🔥 Discover interesting historical events from "this day in history"       |
 | `/btcprice`     | ₿ Get current Bitcoin price and 24-hour percentage change                  |
-| `/expense`      | 💰 Record expenses with natural language (e.g., "chicken 200")            |
-| `/income`       | 💵 Record income transactions                                              |
-| `/undoexpense`  | ↩️ Undo the most recent expense entry                                      |
 | `/epicgames`    | 🎮 List currently free games on Epic Games Store                           |
 | `/steamgames`   | 🎮 List currently free games on Steam                                      |
 | `/wordleanswer` | 🟩 Get today's Wordle answer                                               |
@@ -289,26 +275,6 @@ User: [Selects event #2]
 Bot: [Generates Twitter post, Reddit post, and downloads image]
 ```
 
-### Expense Tracking
-
-Natural language expense and income tracking that syncs directly to Google Sheets.
-
-**Supported Formats:**
-
-```text
-/expense chicken 200
-/expense shoes 260 size 10
-/expense ice cream 250 13 August
-/income salary 41667
-```
-
-**Features:**
-- Natural language parsing
-- Automatic date detection
-- Optional descriptions
-- Google Sheets integration
-- Undo functionality
-
 ### Automated Alerts
 
 The bot includes GitHub Actions workflows that run on a schedule to monitor various services:
@@ -345,7 +311,6 @@ telegram-automations/
 │   ├── btcprice.py             # Bitcoin price command
 │   ├── epicgames.py            # Epic Games command
 │   ├── steamgames.py           # Steam games command
-│   ├── expense.py              # Expense/income tracking
 │   ├── today.py                # Historical events command
 │   ├── users.py                # User management
 │   └── wordleanswer.py         # Wordle answer
@@ -353,7 +318,6 @@ telegram-automations/
 ├── services/                   # Shared service modules
 │   ├── __init__.py
 │   ├── gemini.py               # Google Gemini AI integration
-│   ├── google_sheets.py        # Google Sheets API
 │   ├── historical_events.py    # Wikipedia API integration
 │   ├── additional_sources.py   # Sports, music, movies, gaming APIs
 │   ├── content_generator.py    # Social media content generation
@@ -465,7 +429,6 @@ Optional: Use [UptimeRobot](https://uptimerobot.com/) to ping your `/health` end
 
 * [ ] Enhanced error handling and retry logic
 * [ ] Improved logging and monitoring
-* [ ] Better expense categorization
 * [ ] Unit and integration tests
 
 ### 📋 Planned
